@@ -5,10 +5,9 @@ var mainState = {
 
   preload: function() {
 
-      //game.load.script('gameOverState');
-      game.load.image('background','assets/backgroundSprite.png');
-      game.load.spritesheet('player','assets/shipSprite.png', 100, 100);
-  		//game.load.spritesheet('paperplane','assets/paperplane.png', 35, 35);
+    game.load.image('background','assets/backgroundSprite.png');
+    game.load.spritesheet('player','assets/shipSpriteSheet.png', 100, 100);
+		//game.load.spritesheet('fire','assets/fire.png', 35, 35);
 
   },
 
@@ -24,67 +23,99 @@ var mainState = {
 
     game.physics.p2.enable(player);
 
+    player.body.setZeroDamping();
+
 		//  Our player animations, walking left, right, up and down.
-		player.animations.add('forward', [0, 1, 2], 20, true);
-		player.animations.add('right', [0], 10, true);
-		player.animations.add('up', [0], 10, true);
-    player.animations.add('down', [0], 10, true);
-
-		//paperplane = game.add.sprite(game.world.centerX, game.world.centerY, 'paperplane');
-
-		//game.physics.p2.enable(paperplane);
-
-		// Throwing paperplane animations
-		//paperplane.animations.add('left', [0], 10, true);
-		//paperplane.animations.add('right', [0], 10, true);
-		//paperplane.animations.add('up', [0], 10, true);
-    //paperplane.animations.add('down', [0], 10, true);
+    player.animations.add('idle', [0], 10, true);
+		player.animations.add('thrust', [1, 2], 10, true);
+		player.animations.add('reverse', [3, 4], 10, true);
+		player.animations.add('left', [5, 6], 10, true);
+    player.animations.add('right', [7, 8], 10, true);
+    player.animations.add('thrustAndLeft', [9, 10], 10, true);
+		player.animations.add('thrustAndRight', [11, 12], 10, true);
+		player.animations.add('reverseAndLeft', [13, 14], 10, true);
+    player.animations.add('reverseAndRight', [15, 16], 10, true);
 
     cursors = game.input.keyboard.createCursorKeys();
 
-		keys = game.input.keyboard;
+		keyboard = game.input.keyboard;
 
     //Create game camera, that follows player
     game.camera.follow(player);
 
   },
 
-  //var stopFrame = 19;
-
   update: function() {
 
-    player.body.setZeroVelocity();
-
-    if (cursors.up.isDown)
-    {
-        player.body.moveForward(500)
-				player.animations.play('forward');
-				//stopFrame = 14;
-    }
-    else if (cursors.down.isDown)
-    {
-        player.body.moveBackward(300);
-				//player.animations.play('down');
-				//stopFrame = 19;
+    //Thrust
+    if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) { //No rotation
+      player.body.thrust(500);
+      player.animations.play('thrust');
     }
 
-    if (cursors.left.isDown)
+    //Thrust and Left
+    if (cursors.up.isDown && !cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
+      player.body.thrust(500);
+      player.body.rotateLeft(50);
+      player.animations.play('thrustAndLeft');
+    }
+
+    //Thrust and Right
+    if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
+      player.body.thrust(500);
+      player.body.rotateRight(50);
+      player.animations.play('thrustAndRight');
+    }
+
+    //Reverse
+    if (cursors.down.isDown && !cursors.up.isDown && !cursors.left.isDown && !cursors.right.isDown) { //No rotation
+      player.body.reverse(300);
+      player.animations.play('reverse');
+    }
+
+    //Reverse and Left
+    if (!cursors.up.isDown && cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
+      player.body.reverse(300);
+      player.body.rotateLeft(50);
+      player.animations.play('reverseAndLeft');
+    }
+
+    //Reverse and Right
+    if (!cursors.up.isDown && cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
+      player.body.reverse(300);
+      player.body.rotateRight(50);
+      player.animations.play('reverseAndRight');
+    }
+
+    //=Left
+    if (cursors.left.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.right.isDown)
     {
-        player.body.rotateLeft(80);
-				//player.animations.play('left');
-				//stopFrame = 4;
+      player.body.rotateLeft(50);
+      player.animations.play('left');
     }
-    else if (cursors.right.isDown)
+
+    //Right
+    if (cursors.right.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown)
     {
-        player.body.rotateRight(80);
-				//player.animations.play('right');
-				//stopFrame = 9;
+      player.body.rotateRight(50);
+      player.animations.play('right');
     }
-    else { //Stop rotating
-        player.body.rotateLeft(0);
-        //player.animations.play('right');
-				//stopFrame = 9;
+
+    //No left/right input, so stop rotating
+    if (!cursors.left.isDown && !cursors.right.isDown) {
+      player.body.rotateLeft(0);
     }
+
+    //No input at all, so lie idle
+    if (!cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
+      player.animations.play('idle');
+      //Stop if below certain velocity
+      if ( Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) ) < 100) {
+        player.body.setZeroVelocity();
+      }
+    }
+
+    //Restart game
     this.spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     if (this.spacebar.isDown) {
       player.kill();
@@ -96,7 +127,7 @@ var mainState = {
   render: function() {
 
     //game.debug.cameraInfo(game.camera, 32, 32);
-    //game.debug.spriteCoords(player, 32, 500);
+    game.debug.spriteInfo(player, 32, 500);
 
   }
 
