@@ -1,5 +1,7 @@
-var player;
+// var player;
 var cursors;
+
+var planets;
 
 var mainState = {
 
@@ -7,7 +9,7 @@ var mainState = {
 
     game.load.image('background','assets/backgroundSprite.png');
     game.load.spritesheet('player','assets/shipSpriteSheet.png', 100, 100);
-		//game.load.spritesheet('fire','assets/fire.png', 35, 35);
+    for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/planet" + i + ".png");
 
   },
 
@@ -19,11 +21,25 @@ var mainState = {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
-    player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+    //Put planets in position
+    planets = new Array(9);
+    for (var i=0; i<9; i++) planets[i] = "planet" + i;
+    var planetsDistances = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
+    var planetsDistanceScale = 10;
+    for (var i=0; i<9; i++) planetsDistances[i] = planetsDistances[i] * planetsDistanceScale;
+    for (var i=0; i<9; i++) planets[i] = game.add.sprite(game.world.centerX + planetsDistances[i], game.world.centerY, "planet" + i);
+    for (var i=0; i<9; i++) game.physics.p2.enable(planets[i]);
+    for (var i=0; i<9; i++) planets[i].body.static = true;
+
+    if (saveData[0]) player = game.add.sprite(saveData[0], saveData[1], 'player');
+    else player = game.add.sprite(game.world.centerX - 900, game.world.centerY - 400, 'player');
 
     game.physics.p2.enable(player);
 
     player.body.setZeroDamping();
+
+    if (saveData[2]) player.body.angle = saveData[2];
+    else player.body.angle = 90;
 
 		//  Our player animations, walking left, right, up and down.
     player.animations.add('idle', [0], 10, true);
@@ -36,6 +52,9 @@ var mainState = {
 		player.animations.add('reverseAndLeft', [13, 14], 10, true);
     player.animations.add('reverseAndRight', [15, 16], 10, true);
 
+    //Radar background
+    //
+
     cursors = game.input.keyboard.createCursorKeys();
 
 		keyboard = game.input.keyboard;
@@ -46,6 +65,19 @@ var mainState = {
   },
 
   update: function() {
+
+    //Actions
+    //Save game
+    if (keyboard.addKey(Phaser.Keyboard.F4).isDown) {
+      saveGame();
+    }
+
+    //Load game
+    if (keyboard.addKey(Phaser.Keyboard.F9).isDown) {
+      loadGame();
+    }
+
+    //Update Movement
 
     //Thrust
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) { //No rotation
@@ -87,7 +119,7 @@ var mainState = {
       player.animations.play('reverseAndRight');
     }
 
-    //=Left
+    //Left
     if (cursors.left.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.right.isDown)
     {
       player.body.rotateLeft(50);
@@ -106,11 +138,11 @@ var mainState = {
       player.body.rotateLeft(0);
     }
 
-    //No input at all, so lie idle
+    //No input at all
     if (!cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
       player.animations.play('idle');
       //Stop if below certain velocity
-      if ( Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) ) < 100) {
+      if ( Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) ) < 250) {
         player.body.setZeroVelocity();
       }
     }
@@ -118,9 +150,10 @@ var mainState = {
     //Restart game
     this.spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     if (this.spacebar.isDown) {
-      player.kill();
       game.state.start('gameOver');
     }
+
+    for (var i=0; i<9; i++) planets[i].body.rotateLeft(5);
 
   },
 
@@ -132,3 +165,23 @@ var mainState = {
   }
 
 };
+
+//Extra Methods
+
+//Save game
+function saveGame() {
+  saveData[0] = player.body.x;
+  saveData[1] = player.body.y;
+  saveData[2] = player.body.angle;
+  localStorage.setItem('saveData', JSON.stringify(saveData));
+
+}
+
+//Load game
+function loadGame() {
+  if (localStorage.getItem('saveData')) var saveData = JSON.parse(localStorage.getItem('saveData'));
+  player.body.x = saveData[0];
+  player.body.y = saveData[1];
+  player.body.angle = saveData[2];
+  player.body.setZeroVelocity();
+}
