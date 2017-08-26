@@ -22,6 +22,8 @@ var mainState = {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
+    music.resume();
+
     //Put planets in position
     planets = new Array(9);
     for (var i=0; i<9; i++) planets[i] = "planet" + i;
@@ -148,10 +150,9 @@ var mainState = {
       }
     }
 
-    //Restart game
-    this.spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    if (this.spacebar.isDown) {
-      game.state.start('gameOver');
+    //Quit game
+    if (keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
+      quitGame();
     }
 
     for (var i=0; i<9; i++) planets[i].body.rotateLeft(5);
@@ -167,7 +168,7 @@ var mainState = {
 
 };
 
-//Extra Methods
+//Method definition
 
 //Save game
 function saveGame() {
@@ -185,4 +186,10 @@ function loadGame() {
   player.body.y = saveData[1];
   player.body.angle = saveData[2];
   player.body.setZeroVelocity();
+}
+
+//Quit game
+function quitGame() {
+  music.pause();
+  game.state.start('gameOver');
 }
