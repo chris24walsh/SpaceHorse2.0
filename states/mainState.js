@@ -1,4 +1,5 @@
 // var player;
+
 var cursors;
 
 var planets;
@@ -7,9 +8,9 @@ var mainState = {
 
   preload: function() {
 
-    game.load.image('background','assets/backgroundSprite.png');
-    game.load.spritesheet('player','assets/shipSpriteSheet.png', 100, 100);
-    for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/planet" + i + ".png");
+    game.load.image('background','assets/images/backgroundSprite.png');
+    game.load.spritesheet('player','assets/images/shipSpriteSheet.png', 100, 100);
+    for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
 
   },
 
