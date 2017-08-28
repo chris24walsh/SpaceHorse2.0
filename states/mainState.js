@@ -1,5 +1,3 @@
-// var player;
-
 var cursors;
 
 var planets;
@@ -11,6 +9,7 @@ var mainState = {
     game.load.image('background','assets/images/backgroundSprite.png');
     game.load.spritesheet('player','assets/images/shipSpriteSheet.png', 100, 100);
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
+    game.load.image('radar', 'assets/images/radar.png');
 
   },
 
@@ -22,24 +21,54 @@ var mainState = {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
-    music.resume();
+    // music.resume();
 
     //Put planets in position
     planets = new Array(9);
     for (var i=0; i<9; i++) planets[i] = "planet" + i;
     var planetsDistances = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
-    var planetsDistanceScale = 10;
-    for (var i=0; i<9; i++) planetsDistances[i] = planetsDistances[i] * planetsDistanceScale;
-    for (var i=0; i<9; i++) planets[i] = game.add.sprite(game.world.centerX + planetsDistances[i], game.world.centerY, "planet" + i);
-    for (var i=0; i<9; i++) game.physics.p2.enable(planets[i]);
-    for (var i=0; i<9; i++) planets[i].body.static = true;
+    var planetsDistanceScale = 15;
+    for (var i=0; i<9; i++) {
+      planets[i].anchor.x = 0.5;
+      planets[i].anchor.y = 0.5;
+    }
+    for (var i=0; i<9; i++) {
+      // planets[i].anchor.x = 0.5;
+      // planets[i].anchor.y = 0.5;
+      planetsDistances[i] = planetsDistances[i] * planetsDistanceScale; //Scale up the planet distances
+      var randomAngle = Math.random() * 6.28319;
+      var randomX = planetsDistances[i] * Math.cos(randomAngle);
+      var randomY = planetsDistances[i] * Math.tan(randomAngle);
+      planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
+    }
+    // for (var i=0; i<9; i++) {
+      // planets[i].anchor.x = -planetsDistances[i] + 0.5;
+      // planets[i].anchor.y = 0.5;
+    // }
+    //Scatter planets angle randomly first
+    // for (var i=0; i<9; i++) {
+    //   planets[i].angle = Math.random() * 360;
+    // }
 
     if (saveData[0]) player = game.add.sprite(saveData[0], saveData[1], 'player');
-    else player = game.add.sprite(game.world.centerX - 900, game.world.centerY - 400, 'player');
+    else player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
 
     game.physics.p2.enable(player);
 
     player.body.setZeroDamping();
+
+    player.anchor.x = 0.5;
+    player.anchor.y = 0.5;
+
+    //Put ship next to earth
+    player.body.x = planets[3].x;
+    player.body.y = planets[3].y;
+    // var i = 1;
+    // planets[i].angle = 30;
+    // player.body.x = game.world.centerX + ((planetsDistances[i]) * planets[i].width) * Math.cos(planets[i].angle * Math.PI / 180);
+    // player.body.y = game.world.centerY + ((planetsDistances[i]) * planets[i].width) * Math.tan(planets[i].angle * Math.PI / 180);
+
+
 
     if (saveData[2]) player.body.angle = saveData[2];
     else player.body.angle = 90;
@@ -56,7 +85,7 @@ var mainState = {
     player.animations.add('reverseAndRight', [15, 16], 10, true);
 
     //Radar background
-    //
+    radar = game.add.image(player.body.x + window.innerWidth/5.5, player.body.y - window.innerHeight*0.48, 'radar');
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -155,7 +184,14 @@ var mainState = {
       quitGame();
     }
 
-    for (var i=0; i<9; i++) planets[i].body.rotateLeft(5);
+    //Make planets orbit
+    // for (var i=0; i<9;i++) planets[i].angle -= 0.01;
+
+    //Keep radar in position
+    radar.x = player.body.x + window.innerWidth/5.5;
+    radar.y = player.body.y - window.innerHeight*0.48;
+    //Put planets on radar map
+
 
   },
 
@@ -190,6 +226,6 @@ function loadGame() {
 
 //Quit game
 function quitGame() {
-  music.pause();
+  // music.pause();
   game.state.start('gameOver');
 }
