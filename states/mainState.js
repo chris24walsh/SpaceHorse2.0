@@ -257,6 +257,10 @@ function saveGameData() {
 function saveGame() {
   saveGameData();
   localStorage.setItem('gameData', JSON.stringify(gameData));
+  text = game.add.text(player.body.x, player.body.y - 200, 'Game saved', { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" });
+  text.anchor.set(0.5);
+  text.alpha = 1;
+  game.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
 }
 
 //Load game data
@@ -274,6 +278,10 @@ function loadGameData() {
 //Load game
 function loadGame() {
   if (localStorage.getItem('gameData')) var gameData = JSON.parse(localStorage.getItem('gameData'));
+  text = game.add.text(player.body.x, player.body.y - 200, 'Game loaded', { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" });
+  text.anchor.set(0.5);
+  text.alpha = 1;
+  game.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
   loadGameData();
 }
 
