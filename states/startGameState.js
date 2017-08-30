@@ -21,14 +21,25 @@ var startGameState = {
 
     game.add.tween(text).to({alpha: 1}, 4000, Phaser.Easing.Linear.None, true);
 
+    // timer = new Phaser.Timer(true);
+    //
+    // timer.add(4000, goToMainState(), this);
+    // timer.start();
+
   },
 
   update: function() {
 
     if (game.input.keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
-      game.state.start('main');
+      goToMainState();
     }
+
+
 
   }
 
 };
+
+function goToMainState() {
+  game.state.start('main');
+}
