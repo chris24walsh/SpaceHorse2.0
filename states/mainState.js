@@ -84,32 +84,20 @@ var mainState = {
     game.camera.follow(player);
 
     //Radar background
-    radar = game.add.image(0, 0, 'radar');
+    radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
+    radar.scale.setTo(2, 2);
     game.stage.addChild(radar);
-    radar.x += window.innerWidth*0.68;
-    radar.y += window.innerHeight*0.03;
+    radar.anchor.x = 0.5;
+    radar.anchor.y = 0.5;
 
     //Create radar dots
     planetDots = new Array(9);
     for (var i=0; i<9; i++) {
-      planetDots[i] = game.add.sprite(0, 0, box({length: 5, width: 5, color: '#ff0000'}));
+      planetDots[i] = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ff0000'}));
       radar.addChild(planetDots[i]);
-      // planetDots[i].x += window.innerWidth*0.17;
-      // planetDots[i].y += window.innerHeight*0.19;
-      //Place in scaled relative distance
-      // planetDots[i].x += (planets[i].x - player.body.x) * 10;//window.innerWidth*0.1;
-      // planetDots[i].y += (planets[i].y - player.body.y) * 10;//window.innerHeight*0.1;
-      // console.log(planets[i].x - game.world.centerX);
     }
-    playerDot = game.add.sprite(0, 0, box({length: 5, width: 5, color: '#00ff00'}));
+    playerDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#00ff00'}));
     radar.addChild(playerDot);
-    playerDot.x += window.innerWidth*0.17;//*0.85;
-    playerDot.y += window.innerHeight*0.19;//*0.22;
-
-    // playerDot1 = game.add.sprite(0, 0, box({length: 5, width: 5, color: '#00ff00'}));
-    // radar.addChild(playerDot1);
-    // playerDot.x += window.innerWidth*0.85;
-    // playerDot.y += window.innerHeight*0.22;
 
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -219,9 +207,6 @@ var mainState = {
     for (var i=0; i<9; i++) {
       planetDots[i].x = 0;
       planetDots[i].y = 0;
-      planetDots[i].x += window.innerWidth*0.17;
-      planetDots[i].y += window.innerHeight*0.19;
-      //Place in scaled relative distance
       planetDots[i].x += (planets[i].x - player.body.x) * radarScale;
       planetDots[i].y += (planets[i].y - player.body.y) * radarScale;
     }
