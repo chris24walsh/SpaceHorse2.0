@@ -21,10 +21,9 @@ var startGameState = {
 
     game.add.tween(text).to({alpha: 1}, 4000, Phaser.Easing.Linear.None, true);
 
-    // timer = new Phaser.Timer(true);
-    //
-    // timer.add(4000, goToMainState(), this);
-    // timer.start();
+    timer = game.time.create(true);
+    timer.add(3000, fadeOut, this);
+    timer.start();
 
   },
 
@@ -39,6 +38,13 @@ var startGameState = {
   }
 
 };
+
+function fadeOut() {
+  game.add.tween(text).to({alpha: 0}, 4000, Phaser.Easing.Linear.None, true);
+  timer = game.time.create(true);
+  timer.add(3000, goToMainState, this);
+  timer.start();
+}
 
 function goToMainState() {
   game.state.start('main');
