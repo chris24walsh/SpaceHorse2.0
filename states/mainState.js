@@ -131,9 +131,7 @@ var mainState = {
     }
 
     //Toggle radar
-    if (keyboard.addKey(Phaser.Keyboard.M).onDown) {
-      // toggleRadar();
-    }
+    keyboard.addKey(Phaser.Keyboard.M).onDown.add(toggleRadar, this);
 
     //Update Movement
 
