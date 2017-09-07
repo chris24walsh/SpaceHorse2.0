@@ -15,9 +15,6 @@ var mainState = {
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
 
-    //Load game data
-    // loadGameData();
-
   },
 
   create: function() {
@@ -60,12 +57,6 @@ var mainState = {
     player.anchor.x = 0.5;
     player.anchor.y = 0.5;
 
-    // Put ship next to earth
-    if (!gameData[0]) {
-      player.body.x = planets[3].x + 300;
-      player.body.y = planets[3].y;
-    }
-
     if (gameData[2]) player.body.angle = gameData[2];
     else player.body.angle = 90;
 
@@ -89,6 +80,7 @@ var mainState = {
     game.stage.addChild(radar);
     radar.anchor.x = 0.5;
     radar.anchor.y = 0.5;
+    radar.visible = false;
 
     //Create radar dots
     planetDots = new Array(9);
@@ -109,17 +101,18 @@ var mainState = {
 
     //Actions
     //Save game
-    if (keyboard.addKey(Phaser.Keyboard.F4).isDown) {
-      saveGame();
-    }
+    keyboard.addKey(Phaser.Keyboard.F4).onDown.add(saveGame, this);
 
     //Load game
-    if (keyboard.addKey(Phaser.Keyboard.F9).isDown) {
-      loadGame();
-    }
+    keyboard.addKey(Phaser.Keyboard.F9).onDown.add(loadGame, this);
 
     //Toggle radar
     keyboard.addKey(Phaser.Keyboard.M).onDown.add(toggleRadar, this);
+
+    //Stats menu
+    if (keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
+      statsMenu();
+    }
 
     //Update Movement
 
@@ -195,11 +188,6 @@ var mainState = {
       // player.body.setZeroVelocity();
     }
 
-    //Stats menu
-    if (keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
-      statsMenu();
-    }
-
     //Make planets orbit
     // for (var i=0; i<9;i++) planets[i].angle -= 0.1;
 
@@ -216,8 +204,9 @@ var mainState = {
 
   render: function() {
 
-    //game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteInfo(player, 32, 500);
+    // game.debug.cameraInfo(game.camera, 32, 32);
+    // game.debug.spriteInfo(player, 32, 500);
+    // game.debug.spriteInfo(planets[3], 32, 500);
 
   }
 
