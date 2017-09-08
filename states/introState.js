@@ -22,6 +22,8 @@ var introState = {
 
     game.world.setBounds(0, 0, 1000000, 1000000);
 
+    game.physics.startSystem(Phaser.Physics.P2JS);
+
     // game.physics.startSystem(Phaser.Physics.P2JS);
 
     //Create planets and put in position
@@ -38,21 +40,22 @@ var introState = {
         var randomX = planetsDistances[i] * Math.cos(randomAngle);
         var randomY = planetsDistances[i] * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
-        planets[i].anchor.set(0.5, 0.5);
+        // planets[i].anchor.set(0.5, 0.5);
       }
       // planets[3].pivot.x = 200;
     }
 
     //Focus camera on earth
     game.camera.x = planets[3].x - window.innerWidth/2;
-    game.camera.y = planets[3].y - window.innerHeight/2;
+    game.camera.y = planets[3].y - window.innerHeight/2 + planets[3].height/2;
 
     //Create player near earth
     player = game.add.sprite(planets[3].x, planets[3].y, 'player');
     player.angle = 90;
     player.anchor.x = 0.5;
     player.anchor.y = 0.5;
-    player.x += player.width;
+    player.x += player.width*1.5;
+    player.y += planets[3].height/2;
 
     //  Our player animations, walking left, right, up and down.
     player.animations.add('idle', [0], 10, true);
@@ -341,7 +344,7 @@ var introState = {
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
-    // game.debug.spriteInfo(player, 32, 500);
+    game.debug.spriteInfo(player, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }

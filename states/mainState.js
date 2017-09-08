@@ -41,7 +41,8 @@ var mainState = {
         var randomX = planetsDistances[i] * Math.cos(randomAngle);
         var randomY = planetsDistances[i] * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
-        planets[i].anchor.set(0.5, 0.5);
+        planets[i].anchor.x = 0.5;
+        planets[i].anchor.y = 0.5;
       }
       // planets[3].pivot.x = 200;
     }
@@ -205,7 +206,7 @@ var mainState = {
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
-    // game.debug.spriteInfo(player, 32, 500);
+    game.debug.spriteInfo(player, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }
