@@ -96,6 +96,9 @@ var mainState = {
 
 		keyboard = game.input.keyboard;
 
+    //Make world visible
+    game.world.alpha = 1;
+    
   },
 
   update: function() {
@@ -206,7 +209,7 @@ var mainState = {
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteInfo(player, 32, 500);
+    // game.debug.spriteInfo(player, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }

@@ -336,7 +336,7 @@ var introState = {
       }
 
       //Skip intro
-      game.input.keyboard.addKey(Phaser.Keyboard.ESC).onDown.add(goToMain, this);
+      game.input.keyboard.addKey(Phaser.Keyboard.ESC).onDown.add(skipToMain, this);
     }
 
   },
@@ -344,26 +344,29 @@ var introState = {
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteInfo(player, 32, 500);
+    // game.debug.spriteInfo(player, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }
 
 };
 
-// function triggerText() {
-//   if (canTriggerText) {
-//     story += 1;
-//   }
-// }
+function skipToMain() {
+  //Fade out text
+  var tween1 = game.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true)
+  //Fade out of current cutscene
+  var tween2 = game.add.tween(game.world).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
+  tween2.onComplete.add(function() {
+    //Hide text
+    text.alpha = 0;
+    //World alpha to 1
+    // game.world.alpha = 1;
+    //Continue to mainState
+    goToMain();
+  }, this);
+}
 
 function goToMain() {
-  //Hide text
-  text.alpha = 0;
-
-  //World alpha to 1
-  game.world.alpha = 1;
-
   gameData[0] = player.x;
   gameData[1] = player.y;
   gameData[2] = player.angle;
