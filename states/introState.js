@@ -24,6 +24,9 @@ var introState = {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
+    //Stop music
+    if (music) music.fadeOut(1000);
+
     // game.physics.startSystem(Phaser.Physics.P2JS);
 
     //Create planets and put in position
