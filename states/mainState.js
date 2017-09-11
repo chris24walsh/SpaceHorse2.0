@@ -6,6 +6,7 @@ var planetDots;
 var radarScale = 0.002;
 var cursors;
 var maxSpeed = 1000;
+var degreesToRadians = Math.PI/180;
 
 var mainState = {
 
@@ -13,6 +14,7 @@ var mainState = {
 
     game.load.image('background','assets/images/backgroundSprite.png');
     game.load.spritesheet('player','assets/images/shipSpriteSheet1.png', 100, 100);
+    game.load.image('fireBall', 'assets/images/fireBall.png');
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
 
@@ -74,6 +76,11 @@ var mainState = {
 		player.animations.add('reverseAndLeft', [13, 14], 10, true);
     player.animations.add('reverseAndRight', [15, 16], 10, true);
 
+    //Create weapon
+    weapon = game.add.weapon(30, 'fireBall');
+    weapon.bulletKillType = Phaser.Weapon.KILL_CAMERA_BOUNDS;
+    weapon.trackSprite(player, 0, 0, false);
+
     //Create game camera, that follows player
     game.camera.follow(player);
 
@@ -114,6 +121,9 @@ var mainState = {
 
     //Toggle radar
     keyboard.addKey(Phaser.Keyboard.M).onDown.add(toggleRadar, this);
+
+    //Fire weapon
+    keyboard.addKey(Phaser.Keyboard.F).onDown.add(fireWeapon, this);
 
     //Stats menu
     if (keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
@@ -244,7 +254,7 @@ function saveGameData() {
 function saveGame() {
   saveGameData();
   localStorage.setItem('gameData', JSON.stringify(gameData));
-  var text = game.add.text(window.innerWidth/2, window.innerHeight/4, 'Game saved', { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" });
+  var text = game.add.text(window.innerWidth/2, window.innerHeight/4, 'Game saved', { font: "bold 32px Arial", fill: "#fff"});
   game.stage.addChild(text);
   text.anchor.set(0.5);
   text.alpha = 1;
@@ -269,7 +279,7 @@ function loadGame() {
     gameData = JSON.parse(localStorage.getItem('gameData'));
     loadGameData();
   }
-  var text = game.add.text(window.innerWidth/2, window.innerHeight/4, 'Game loaded', { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" });
+  var text = game.add.text(window.innerWidth/2, window.innerHeight/4, 'Game loaded', { font: "bold 32px Arial", fill: "#fff"});
   game.stage.addChild(text);
   text.anchor.set(0.5);
   text.alpha = 1;
@@ -310,6 +320,15 @@ function toggleRadar() {
   }
 }
 
+//Fire weapon
+function fireWeapon() {
+  weapon.trackOffset.x = Math.sin(player.body.angle *  degreesToRadians) * player.width/2;
+  weapon.trackOffset.y = Math.cos(player.body.angle *  degreesToRadians) * player.width/2 * (-1);
+  weapon.fireAngle = player.body.angle - 90;
+  weapon.bulletSpeed = calculateSpeed() + 1000;
+  weapon.fire();
+}
+
 //Display velocity
 function displayVelocity() {
   var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
@@ -339,7 +358,7 @@ function decreaseVelocity() {
 }
 
 //Change velocity
-function updateVelocity(s) {
-  player.body.velocity.x = Math.sin(player.body.angle *  0.01745329252) * s;
-  player.body.velocity.y = Math.cos(player.body.angle *  0.01745329252) * s * (-1);
+function updateVelocity(speed) {
+  player.body.velocity.x = Math.sin(player.body.angle *  degreesToRadians) * speed;
+  player.body.velocity.y = Math.cos(player.body.angle *  degreesToRadians) * speed * (-1);
 }
