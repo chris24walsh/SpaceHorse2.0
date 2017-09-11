@@ -7,6 +7,7 @@ var radarScale = 0.002;
 var cursors;
 var maxSpeed = 1000;
 var degreesToRadians = Math.PI/180;
+var enemyMoveCounter = 0;
 
 var mainState = {
 
@@ -84,6 +85,14 @@ var mainState = {
     //Create game camera, that follows player
     game.camera.follow(player);
 
+    //Create enemy
+    enemy = game.add.sprite(game.world.centerX + 300, game.world.centerY + 100, 'player');
+    game.physics.p2.enable(enemy);
+    enemy.body.setZeroDamping();
+    enemy.anchor.setTo(0.5, 0.5);
+    enemy.animations.add('idle', [0], 10, true);
+		enemy.animations.add('thrust', [1, 2], 10, true);
+
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
     radar.scale.setTo(2, 2);
@@ -95,9 +104,11 @@ var mainState = {
     //Create radar dots
     planetDots = new Array(9);
     for (var i=0; i<9; i++) {
-      planetDots[i] = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ff0000'}));
+      planetDots[i] = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#6666ff'}));
       radar.addChild(planetDots[i]);
     }
+    enemyDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ff0000'}));
+    radar.addChild(enemyDot);
     playerDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#00ff00'}));
     radar.addChild(playerDot);
 
@@ -222,6 +233,19 @@ var mainState = {
       planetDots[i].y = 0;
       planetDots[i].x += (planets[i].x - player.body.x) * radarScale;
       planetDots[i].y += (planets[i].y - player.body.y) * radarScale;
+    }
+    enemyDot.x = 0;
+    enemyDot.y = 0;
+    enemyDot.x += (enemy.body.x - player.body.x) * radarScale;
+    enemyDot.y += (enemy.body.y - player.body.y) * radarScale;
+
+
+    //Update AI
+    enemy.body.moveForward(100);
+    enemy.animations.play('thrust');
+    if (game.time.now > enemyMoveCounter) {
+      enemy.body.angle = Math.random() * 360;
+      enemyMoveCounter = game.time.now + 3000;
     }
 
 
