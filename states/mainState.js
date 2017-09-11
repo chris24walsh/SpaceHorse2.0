@@ -95,7 +95,7 @@ var mainState = {
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
-    radar.scale.setTo(2, 2);
+    radar.scale.setTo(window.innerWidth/radar.width * 0.9, window.innerHeight/radar.height * 0.9);
     game.stage.addChild(radar);
     radar.anchor.x = 0.5;
     radar.anchor.y = 0.5;
@@ -107,8 +107,10 @@ var mainState = {
       planetDots[i] = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#6666ff'}));
       radar.addChild(planetDots[i]);
     }
+    //Enemy dot
     enemyDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ff0000'}));
     radar.addChild(enemyDot);
+    //Player dot
     playerDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#00ff00'}));
     radar.addChild(playerDot);
 
@@ -247,6 +249,8 @@ var mainState = {
       enemy.body.angle = Math.random() * 360;
       enemyMoveCounter = game.time.now + 3000;
     }
+    //Shooting behaviour
+    // if ()
 
 
   },
