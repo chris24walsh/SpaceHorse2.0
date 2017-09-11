@@ -18,7 +18,6 @@ var startGameState = {
     text = game.add.bitmapText(window.innerWidth/2, window.innerHeight/2, 'pirulen', 'SPACE HORSE');
     text.anchor.set(0.5);
     text.alpha = 0;
-    text.tint = '#fff';
 
     //Fade in text, move, and fade out text
     tween1 = game.add.tween(text).to({alpha: 1}, 3000, Phaser.Easing.Linear.None);

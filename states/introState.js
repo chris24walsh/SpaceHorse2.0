@@ -5,6 +5,8 @@ var story;
 var runStory;
 var advanceStory;
 
+var planetScale = 2;
+
 var introState = {
 
   preload: function() {
@@ -25,7 +27,7 @@ var introState = {
     game.physics.startSystem(Phaser.Physics.P2JS);
 
     //Stop music
-    if (music) music.fadeOut(1000);
+    // if (music) music.fadeOut(1000);
 
     // game.physics.startSystem(Phaser.Physics.P2JS);
 
@@ -43,22 +45,24 @@ var introState = {
         var randomX = planetsDistances[i] * Math.cos(randomAngle);
         var randomY = planetsDistances[i] * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
-        // planets[i].anchor.set(0.5, 0.5);
+        // planets[i].anchor.setTo(0.5, 0.5);
       }
       // planets[3].pivot.x = 200;
     }
+    for (var i=0; i<9; i++) planets[i].anchor.setTo(0.5, 0.5);
+    for (var i=0; i<9; i++) planets[i].scale.setTo(planetScale, planetScale);
 
     //Focus camera on earth
     game.camera.x = planets[3].x - window.innerWidth/2;
-    game.camera.y = planets[3].y - window.innerHeight/2 + planets[3].height/2;
+    game.camera.y = planets[3].y - window.innerHeight/2;// + planets[3].height/2;
 
     //Create player near earth
     player = game.add.sprite(planets[3].x, planets[3].y, 'player');
     player.angle = 90;
     player.anchor.x = 0.5;
     player.anchor.y = 0.5;
-    player.x += player.width*1.5;
-    player.y += planets[3].height/2;
+    player.x += planets[3].width*1.5;
+    // player.y += planets[3].height/2;
 
     //  Our player animations, walking left, right, up and down.
     player.animations.add('idle', [0], 10, true);
