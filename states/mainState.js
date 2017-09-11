@@ -5,6 +5,7 @@ var radar;
 var planetDots;
 var radarScale = 0.002;
 var cursors;
+var maxSpeed = 1000;
 
 var mainState = {
 
@@ -64,8 +65,10 @@ var mainState = {
     player.animations.add('idle', [0], 10, true);
 		player.animations.add('thrust', [1, 2], 10, true);
 		player.animations.add('reverse', [3, 4], 10, true);
-		player.animations.add('left', [5, 6], 10, true);
-    player.animations.add('right', [7, 8], 10, true);
+		player.animations.add('stoppedLeft', [5, 6], 10, true);
+    player.animations.add('stoppedRight', [7, 8], 10, true);
+    player.animations.add('movingLeft', [5, 6], 10, true);
+    player.animations.add('movingRight', [7, 8], 10, true);
     player.animations.add('thrustAndLeft', [9, 10], 10, true);
 		player.animations.add('thrustAndRight', [11, 12], 10, true);
 		player.animations.add('reverseAndLeft', [13, 14], 10, true);
@@ -122,70 +125,70 @@ var mainState = {
     //Update Movement
 
     //Thrust
-    if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) { //No rotation
-      // player.body.moveForward(700);
+    if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
       increaseVelocity();
-      player.animations.play('thrust');
+      if (calculateSpeed() < maxSpeed) player.animations.play('thrust');
+      else player.animations.play('idle');
     }
 
     //Thrust and Left
     if (cursors.up.isDown && !cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      // player.body.moveForward(700);
       increaseVelocity();
       player.body.rotateLeft(50);
-      player.animations.play('thrustAndLeft');
+      if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndLeft');
+      else player.animations.play('movingLeft');
     }
 
     //Thrust and Right
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      // player.body.moveForward(700);
       increaseVelocity();
       player.body.rotateRight(50);
-      player.animations.play('thrustAndRight');
+      if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndRight');
+      else player.animations.play('movingRight');
     }
 
     //Reverse
-    if (cursors.down.isDown && !cursors.up.isDown && !cursors.left.isDown && !cursors.right.isDown) { //No rotation
-      // player.body.moveBackward(700);
+    if (cursors.down.isDown && !cursors.up.isDown && !cursors.left.isDown && !cursors.right.isDown) {
       decreaseVelocity();
-      player.animations.play('reverse');
+      if (calculateSpeed() > 0) player.animations.play('reverse');
+      else player.animations.play('idle');
     }
 
     //Reverse and Left
     if (!cursors.up.isDown && cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      // player.body.moveBackward(700);
       decreaseVelocity();
       player.body.rotateLeft(50);
-      player.animations.play('reverseAndLeft');
+      if (calculateSpeed() > 0) player.animations.play('reverseAndLeft');
+      else player.animations.play('stoppedLeft');
     }
 
     //Reverse and Right
     if (!cursors.up.isDown && cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      // player.body.moveBackward(700);
       decreaseVelocity();
       player.body.rotateRight(50);
-      player.animations.play('reverseAndRight');
+      if (calculateSpeed() > 0) player.animations.play('reverseAndRight');
+      else player.animations.play('stoppedRight');
     }
 
     //Left
     if (cursors.left.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.right.isDown)
     {
       player.body.rotateLeft(50);
-      changeVelocity();
-      player.animations.play('left');
+      updateVelocity(calculateSpeed());
+      player.animations.play('stoppedLeft');
     }
 
     //Right
     if (cursors.right.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown)
     {
       player.body.rotateRight(50);
-      changeVelocity();
-      player.animations.play('right');
+      updateVelocity(calculateSpeed());
+      player.animations.play('stoppedRight');
     }
 
     //No forward/back input, so stop moving
     if (!cursors.up.isDown && !cursors.down.isDown) {
-      // player.body.setZeroVelocity();
+
     }
 
     //No left/right input, so stop rotating
@@ -198,7 +201,6 @@ var mainState = {
     //No input at all
     if (!cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
       player.animations.play('idle');
-      // player.body.setZeroVelocity();
     }
 
     //Make planets orbit
@@ -314,30 +316,30 @@ function displayVelocity() {
   console.log(player.body.velocity.x, player.body.velocity.y, v);
 }
 
+//Calculate velocity
+function calculateSpeed() {
+  var s = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
+  return s;
+}
 
 //Increase Velocity
 function increaseVelocity() {
-  //Calculate absolute velocity of ship, from x and y vectors
-  var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
-  if (v < 700) v += 10;
-  player.body.velocity.x = Math.sin(player.body.rotation) * v;
-  player.body.velocity.y = Math.cos(player.body.rotation) * v * (-1);
+  var s = calculateSpeed();
+  console.log(s);
+  if (s < maxSpeed) s += 10;
+  updateVelocity(s);
 }
 
 //Decrease Velocity
 function decreaseVelocity() {
-  //Calculate absolute velocity of ship, from x and y vectors
-  var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
-  if (v > 0) v -= 10;
-  if (v < 0) v = 0;
-  player.body.velocity.x = Math.sin(player.body.angle *  0.01745329252) * v;
-  player.body.velocity.y = Math.cos(player.body.angle *  0.01745329252) * v * (-1);
+  var s = calculateSpeed();
+  if (s > 0) s -= 10;
+  if (s < 0) s = 0;
+  updateVelocity(s);
 }
 
 //Change velocity
-function changeVelocity() {
-  //Calculate absolute velocity of ship, from x and y vectors
-  var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
-  player.body.velocity.x = Math.sin(player.body.angle *  0.01745329252) * v;
-  player.body.velocity.y = Math.cos(player.body.angle *  0.01745329252) * v * (-1);
+function updateVelocity(s) {
+  player.body.velocity.x = Math.sin(player.body.angle *  0.01745329252) * s;
+  player.body.velocity.y = Math.cos(player.body.angle *  0.01745329252) * s * (-1);
 }
