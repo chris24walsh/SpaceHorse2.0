@@ -370,7 +370,7 @@ function calculateSpeed() {
 }
 
 //Increase Velocity
-function increaseVelocity() {
+function accelerate() {
   var s = calculateSpeed();
   console.log(s);
   if (s < maxSpeed) s += 10;
@@ -378,7 +378,7 @@ function increaseVelocity() {
 }
 
 //Decrease Velocity
-function decreaseVelocity() {
+function deccelerate() {
   var s = calculateSpeed();
   if (s > 0) s -= 10;
   if (s < 0) s = 0;
