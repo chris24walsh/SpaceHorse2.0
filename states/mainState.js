@@ -7,7 +7,9 @@ var radarScale = 0.002;
 var cursors;
 var maxSpeed = 1000;
 var degreesToRadians = Math.PI/180;
+var radiansToDegrees = 1/degreesToRadians;
 var enemyMoveCounter = 0;
+var enemySpeed = 100;
 
 var mainState = {
 
@@ -86,7 +88,7 @@ var mainState = {
     game.camera.follow(player);
 
     //Create enemy
-    enemy = game.add.sprite(game.world.centerX + 300, game.world.centerY + 100, 'player');
+    enemy = game.add.sprite(game.world.centerX - 100, game.world.centerY + 200, 'player');
     game.physics.p2.enable(enemy);
     enemy.body.setZeroDamping();
     enemy.anchor.setTo(0.5, 0.5);
@@ -243,15 +245,26 @@ var mainState = {
 
 
     //Update AI
-    enemy.body.moveForward(100);
-    enemy.animations.play('thrust');
-    if (game.time.now > enemyMoveCounter) {
-      enemy.body.angle = Math.random() * 360;
-      enemyMoveCounter = game.time.now + 3000;
+    if (game.time.now > enemyMoveCounter) { //Adjust velocity at regular intervals
+      //Enemy follows you if you get too close
+      tooClose = true; //always for now..
+      if (tooClose) {
+        enemySpeed = 200;
+        if (player.body.y < enemy.body.y) enemy.body.rotation = Math.atan( (player.body.x - enemy.body.x) / -(player.body.y - enemy.body.y) );
+        else {
+          enemy.body.rotation = Math.atan( (player.body.y - enemy.body.y) / (player.body.x - enemy.body.x) ) + (Math.PI / 2);
+          if (player.body.x < enemy.body.x) enemy.body.rotation += Math.PI;
+        }
+        enemyMoveCounter = game.time.now + 100; //Much more alert reaction
+      }
+      else { //Random aimless motion
+        enemySpeed = 100;
+        enemy.body.angle += (Math.random() * 220) - 110;
+        enemyMoveCounter = game.time.now + 2000; //Sluggish to react
+      }
     }
-    //Shooting behaviour
-    // if ()
-
+    enemy.body.moveForward(enemySpeed); //Always moving
+    enemy.animations.play('thrust');
 
   },
 
