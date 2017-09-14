@@ -1,9 +1,11 @@
-var timeDelay = 0;
-var textCount = 0;
-// var canTriggerText = false;
-var story;
-var runStory;
-var advanceStory;
+var textString;
+var textDelay;
+var textTime;
+var textCount;
+var textName;
+var storyNumber;
+var canRunStory;
+var canAdvanceStory;
 
 var planetScale = 2;
 
@@ -64,7 +66,7 @@ var introState = {
     player.x += planets[3].width*1.5;
     // player.y += planets[3].height/2;
 
-    //  Our player animations, walking left, right, up and down.
+    //  Our player animations, forward and idle.
     player.animations.add('idle', [0], 10, true);
 		player.animations.add('thrust', [1, 2], 10, true);
 
@@ -75,18 +77,20 @@ var introState = {
     text.wordWrap = true;
     text.wordWrapWidth = window.innerWidth*0.4;
 
-    story = 0;
-    runStory = true;
-    displayTextTrue = false;
-    timeDelay = 0;
-    textCount = 0;
+    //Initialize story
+    storyNumber = 0;
+    canRunStory = true;
+    canAdvanceStory = false;
+    canPrintText = false;
+    // textDelay = 0;
+    // textCount = 0;
 
-    //Toggle dialog
+    //Toggle text
     game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.add(function () {
-      if (advanceStory) {
-        story += 1;
-        runStory = true;
-        advanceStory = false;
+      if (canAdvanceStory) {
+        storyNumber += 1;
+        canRunStory = true;
+        canAdvanceStory = false;
       }
     });
 
@@ -94,62 +98,44 @@ var introState = {
 
   update: function() {
 
-    if (displayTextTrue) displayText();
+    if (canPrintText) printText();
 
     //Opening plot sequence
-    if (runStory) {
-      if (story == 0) {
-        runStory = false;
+    if (canRunStory) {
+      if (storyNumber == 0) {
+        canRunStory = false;
         //Fade in world 3 sec
         game.world.alpha = 0;
         var tween = game.add.tween(game.world).to({alpha: 1}, 3000, Phaser.Easing.Linear.None, true)
         tween.onComplete.add(function(){
           //Boss speaks
-          text.addColor('#ff3300', 0);
-          text.alpha = 1;
-          textString = 'Boss: ...and this time, I want no more screw-ups!';
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#ff3300', '...and this time, I want no more screw-ups!', 50, 'Boss: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 1) {
-        runStory = false;
+      else if (storyNumber == 1) {
+        canRunStory = false;
         //Fade out text 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //Boss speaks
-          text.addColor('#ff3300', 0);
-          textString = "Boss: Get that package to Pluto, pronto!";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#ff3300', "Get that package to Pluto, pronto!", 50, 'Boss: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 2) {
-        runStory = false;
+      else if (storyNumber == 2) {
+        canRunStory = false;
         // text.alpha = 1;
         //Fade out text 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: Yes, Boss..";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', "Yes, Boss..", 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 3) {
-        runStory = false;
+      else if (storyNumber == 3) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween1 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         //Take off, slowly
@@ -160,66 +146,42 @@ var introState = {
           //Stop moving
           player.animations.play('idle');
           //Boss speaks
-          text.addColor('#ff3300', 0);
-          textString = "Boss: Oh...and no more 'fuel stops' by the gambling ring on Saturn. You're late enough as it is!";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#ff3300', "Oh...and no more 'fuel stops' by the gambling ring on Saturn. You're late enough as it is!", 50, 'Boss: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 4) {
-        runStory = false;
+      else if (storyNumber == 4) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: But Boss, I told you I had to...";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', 'But Boss, I told you I had to...', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 5) {
-        runStory = false;
+      else if (storyNumber == 5) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //Boss speaks
-          text.addColor('#ff3300', 0);
-          textString = "Boss: JUST GET A MOVE ON!";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#ff3300', 'JUST GET A MOVE ON!', 0, 'Boss: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 6) {
-        runStory = false;
+      else if (storyNumber == 6) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: ....sigh...";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', '....sigh...', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 7) {
-        runStory = false;
+      else if (storyNumber == 7) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween1 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         //Take off again, slowly
@@ -230,34 +192,22 @@ var introState = {
           //Stop ship
           player.animations.play('idle');
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: ....(mutter)..(grumble)...";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', '....(mutter)..(grumble)...', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 8) {
-        runStory = false;
+      else if (storyNumber == 8) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //Boss speaks
-          text.addColor('#ff3300', 0);
-          textString = "Boss: I heard THAT, there goes your monthly bonus! Now get off this planet before I launch you personally into the Sun. With my BOOT!";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#ff3300', 'I heard THAT, there goes your monthly bonus! Now get off this planet before I launch you personally into the Sun. With my BOOT!', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 9) {
-        runStory = false;
+      else if (storyNumber == 9) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween1 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None);
         //Fly out of screen right
@@ -284,51 +234,33 @@ var introState = {
           //Stop ship
           player.animations.play('idle');
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: He never even pays us our monthly bonus...";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', 'He never even pays us our monthly bonus...', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 10) {
-        runStory = false;
+      else if (storyNumber == 10) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         tween.onComplete.add(function(){
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: Anyway, time to get this stinking package to Pluto. Who's dumb enough to live all the way out there on that rock anyway? Ha! Some poor idiot..(chortle)";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', 'Anyway, time to get this stinking package to Pluto. Who\'s dumb enough to live all the way out there on that rock anyway? Ha! Some poor idiot..(chortle)', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 11) {
-        runStory = false;
+      else if (storyNumber == 11) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween1 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         // var tween2 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, false, 3000);
         tween1.onComplete.add(function(){
           //H speaks
-          text.addColor('#66ff66', 0);
-          textString = "H: ....er, where exactly is Pluto again anyway? Never mind, how hard can it be to find it? Let's go!";
-          text.alpha = 1;
-          text.text = '';
-          displayTextTrue = true;
-          timeDelay = game.time.now + 50;
-          textCount = 0;
-          advanceStory = true;
+          setText('#66ff66', '....er, where exactly is Pluto again anyway? Never mind, how hard can it be to find it? Let\'s go!', 50, 'H: ');
+          canPrintText = true;
         }, this);
       }
-      else if (story == 12) {
-        runStory = false;
+      else if (storyNumber == 12) {
+        canRunStory = false;
         //Fade out 0.5 sec
         var tween1 = game.add.tween(text).to({alpha: 0}, 350, Phaser.Easing.Linear.None, true);
         //Continue flying away
@@ -361,13 +293,11 @@ var introState = {
 function skipToMain() {
   //Fade out text
   var tween1 = game.add.tween(text).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true)
-  //Fade out of current cutscene
+  //Fade out world
   var tween2 = game.add.tween(game.world).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true);
   tween2.onComplete.add(function() {
-    //Hide text
-    text.alpha = 0;
-    //World alpha to 1
-    // game.world.alpha = 1;
+    // //Hide text
+    // text.alpha = 0;
     //Continue to mainState
     goToMain();
   }, this);
@@ -384,10 +314,27 @@ function goToMain() {
   game.state.start('main');
 }
 
-function displayText() {
-  if (game.time.now > timeDelay && textCount < textString.length) {
+function setText(color, string, delay, name) {
+  text.text = ''; //Reset text to empty
+  text.addColor(color, 0);
+  textString = string;
+  textDelay = delay;
+  textTime = game.time.now + textDelay;
+  textCount = 0;
+  textName = name;
+  text.text += textName;
+  text.alpha = 1;
+}
+
+function printText() {
+  // textBox.alpha = 1;
+  if (game.time.now > textTime && textCount < textString.length) {
     text.text = text.text.concat(textString.charAt(textCount));
-    timeDelay += 50;
+    textTime += textDelay;
     textCount += 1;
+  }
+  if (textCount >= textString.length) {
+    canPrintText = false;
+    canAdvanceStory = true;
   }
 }
