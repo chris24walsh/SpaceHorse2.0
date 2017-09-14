@@ -147,47 +147,47 @@ var mainState = {
 
     //Update Movement
 
-    //Thrust
+    //Accelerate
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
-      increaseVelocity();
+      accelerate();
       if (calculateSpeed() < maxSpeed) player.animations.play('thrust');
       else player.animations.play('idle');
     }
 
-    //Thrust and Left
+    //Accelerate and Left
     if (cursors.up.isDown && !cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      increaseVelocity();
+      accelerate();
       player.body.rotateLeft(50);
       if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndLeft');
       else player.animations.play('movingLeft');
     }
 
-    //Thrust and Right
+    //Accelerate and Right
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      increaseVelocity();
+      accelerate();
       player.body.rotateRight(50);
       if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndRight');
       else player.animations.play('movingRight');
     }
 
-    //Reverse
+    //Deccelerate
     if (cursors.down.isDown && !cursors.up.isDown && !cursors.left.isDown && !cursors.right.isDown) {
-      decreaseVelocity();
+      deccelerate();
       if (calculateSpeed() > 0) player.animations.play('reverse');
       else player.animations.play('idle');
     }
 
-    //Reverse and Left
+    //Deccelerate and Left
     if (!cursors.up.isDown && cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      decreaseVelocity();
+      deccelerate();
       player.body.rotateLeft(50);
       if (calculateSpeed() > 0) player.animations.play('reverseAndLeft');
       else player.animations.play('stoppedLeft');
     }
 
-    //Reverse and Right
+    //Deccelerate and Right
     if (!cursors.up.isDown && cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      decreaseVelocity();
+      deccelerate();
       player.body.rotateRight(50);
       if (calculateSpeed() > 0) player.animations.play('reverseAndRight');
       else player.animations.play('stoppedRight');
