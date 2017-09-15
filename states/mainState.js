@@ -145,53 +145,53 @@ var mainState = {
       statsMenu();
     }
 
-    keyboard.addKey(Phaser.Keyboard.V).onDown.add(displayVelocity, this);
+    // keyboard.addKey(Phaser.Keyboard.V).onDown.add(displayVelocity, this);
 
     //Update Movement
 
     //Accelerate
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
-      accelerate();
-      if (calculateSpeed() < maxSpeed) player.animations.play('thrust');
+      accelerate(player);
+      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrust');
       else player.animations.play('idle');
     }
 
     //Accelerate and Left
     if (cursors.up.isDown && !cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      accelerate();
+      accelerate(player);
       player.body.rotateLeft(50);
-      if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndLeft');
+      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrustAndLeft');
       else player.animations.play('movingLeft');
     }
 
     //Accelerate and Right
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      accelerate();
+      accelerate(player);
       player.body.rotateRight(50);
-      if (calculateSpeed() < maxSpeed) player.animations.play('thrustAndRight');
+      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrustAndRight');
       else player.animations.play('movingRight');
     }
 
     //Deccelerate
     if (cursors.down.isDown && !cursors.up.isDown && !cursors.left.isDown && !cursors.right.isDown) {
-      deccelerate();
-      if (calculateSpeed() > 0) player.animations.play('reverse');
+      deccelerate(player);
+      if (calculateSpeed(player) > 0) player.animations.play('reverse');
       else player.animations.play('idle');
     }
 
     //Deccelerate and Left
     if (!cursors.up.isDown && cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
-      deccelerate();
+      deccelerate(player);
       player.body.rotateLeft(50);
-      if (calculateSpeed() > 0) player.animations.play('reverseAndLeft');
+      if (calculateSpeed(player) > 0) player.animations.play('reverseAndLeft');
       else player.animations.play('stoppedLeft');
     }
 
     //Deccelerate and Right
     if (!cursors.up.isDown && cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
-      deccelerate();
+      deccelerate(player);
       player.body.rotateRight(50);
-      if (calculateSpeed() > 0) player.animations.play('reverseAndRight');
+      if (calculateSpeed(player) > 0) player.animations.play('reverseAndRight');
       else player.animations.play('stoppedRight');
     }
 
@@ -199,7 +199,7 @@ var mainState = {
     if (cursors.left.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.right.isDown)
     {
       player.body.rotateLeft(50);
-      updateVelocity(calculateSpeed());
+      updateVelocity(player, calculateSpeed(player));
       player.animations.play('stoppedLeft');
     }
 
@@ -207,7 +207,7 @@ var mainState = {
     if (cursors.right.isDown && !cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown)
     {
       player.body.rotateRight(50);
-      updateVelocity(calculateSpeed());
+      updateVelocity(player, calculateSpeed(player));
       player.animations.play('stoppedRight');
     }
 
@@ -250,11 +250,13 @@ var mainState = {
       tooClose = true; //always for now..
       if (tooClose) {
         enemySpeed = 200;
-        if (player.body.y < enemy.body.y) enemy.body.rotation = Math.atan( (player.body.x - enemy.body.x) / -(player.body.y - enemy.body.y) );
-        else {
-          enemy.body.rotation = Math.atan( (player.body.y - enemy.body.y) / (player.body.x - enemy.body.x) ) + (Math.PI / 2);
-          if (player.body.x < enemy.body.x) enemy.body.rotation += Math.PI;
-        }
+        // if (player.body.y < enemy.body.y) enemy.body.rotation = Math.atan( (player.body.x - enemy.body.x) / -(player.body.y - enemy.body.y) );
+        // else {
+        //   enemy.body.rotation = Math.atan( (player.body.y - enemy.body.y) / (player.body.x - enemy.body.x) ) + (Math.PI / 2);
+        //   if (player.body.x < enemy.body.x) enemy.body.rotation += Math.PI;
+        // }
+        enemy.body.rotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
+        console.log(game.math.angleBetween(player.body.x, player.body.y, enemy.body.x, enemy.body.y));
         enemyMoveCounter = game.time.now + 100; //Much more alert reaction
       }
       else { //Random aimless motion
@@ -263,7 +265,7 @@ var mainState = {
         enemyMoveCounter = game.time.now + 2000; //Sluggish to react
       }
     }
-    enemy.body.moveForward(enemySpeed); //Always moving
+    // enemy.body.moveForward(enemySpeed); //Always moving
     enemy.animations.play('thrust');
 
   },
@@ -366,40 +368,39 @@ function fireWeapon() {
   weapon.trackOffset.x = Math.sin(player.body.angle *  degreesToRadians) * player.width/2;
   weapon.trackOffset.y = Math.cos(player.body.angle *  degreesToRadians) * player.width/2 * (-1);
   weapon.fireAngle = player.body.angle - 90;
-  weapon.bulletSpeed = calculateSpeed() + 1000;
+  weapon.bulletSpeed = calculateSpeed(sprite) + 1000;
   weapon.fire();
 }
 
-//Display velocity
-function displayVelocity() {
-  var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
-  console.log(player.body.velocity.x, player.body.velocity.y, v);
-}
+// //Display velocity
+// function displayVelocity() {
+//   var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
+//   console.log(player.body.velocity.x, player.body.velocity.y, v);
+// }
 
 //Calculate velocity
-function calculateSpeed() {
-  var s = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
+function calculateSpeed(sprite) {
+  var s = Math.sqrt( Math.pow(sprite.body.velocity.x, 2) + Math.pow(sprite.body.velocity.y, 2) );
   return s;
 }
 
 //Increase Velocity
-function accelerate() {
-  var s = calculateSpeed();
-  console.log(s);
+function accelerate(sprite) {
+  var s = calculateSpeed(sprite);
   if (s < maxSpeed) s += 10;
-  updateVelocity(s);
+  updateVelocity(sprite, s);
 }
 
 //Decrease Velocity
-function deccelerate() {
-  var s = calculateSpeed();
+function deccelerate(sprite) {
+  var s = calculateSpeed(sprite);
   if (s > 0) s -= 10;
   if (s < 0) s = 0;
-  updateVelocity(s);
+  updateVelocity(sprite, s);
 }
 
 //Change velocity
-function updateVelocity(speed) {
-  player.body.velocity.x = Math.sin(player.body.angle *  degreesToRadians) * speed;
-  player.body.velocity.y = Math.cos(player.body.angle *  degreesToRadians) * speed * (-1);
+function updateVelocity(sprite, speed) {
+  sprite.body.velocity.x = Math.sin(sprite.body.angle *  degreesToRadians) * speed;
+  sprite.body.velocity.y = Math.cos(sprite.body.angle *  degreesToRadians) * speed * (-1);
 }
