@@ -18,6 +18,7 @@ var mainState = {
 
     game.load.image('background','assets/images/backgroundSprite.png');
     game.load.spritesheet('player','assets/images/shipSpriteSheet1.png', 100, 100);
+    game.load.spritesheet('enemy', 'assets/images/enemyShip.png', 100, 100);
     game.load.image('fireBall', 'assets/images/fireBall.png');
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
@@ -89,12 +90,12 @@ var mainState = {
     game.camera.follow(player);
 
     //Create enemy
-    enemy = game.add.sprite(game.world.centerX + (Math.random() * 2000 - 1000), game.world.centerY + (Math.random() * 2000 - 1000), 'player');
+    enemy = game.add.sprite(game.world.centerX + (Math.random() * 2000 - 1000), game.world.centerY + (Math.random() * 2000 - 1000), 'enemy');
     game.physics.p2.enable(enemy);
     enemy.body.setZeroDamping();
     enemy.anchor.setTo(0.5, 0.5);
     enemy.animations.add('idle', [0], 10, true);
-		enemy.animations.add('thrust', [1, 2], 10, true);
+		enemy.animations.add('thrust', [0], 10, true);
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
