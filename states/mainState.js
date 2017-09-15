@@ -247,25 +247,21 @@ var mainState = {
     //Update AI
     if (game.time.now > enemyMoveCounter) { //Adjust velocity at regular intervals
       //Enemy follows you if you get too close
-      tooClose = true; //always for now..
+      tooClose = false; //always for now..
       if (tooClose) {
         enemySpeed = 200;
-        // if (player.body.y < enemy.body.y) enemy.body.rotation = Math.atan( (player.body.x - enemy.body.x) / -(player.body.y - enemy.body.y) );
-        // else {
-        //   enemy.body.rotation = Math.atan( (player.body.y - enemy.body.y) / (player.body.x - enemy.body.x) ) + (Math.PI / 2);
-        //   if (player.body.x < enemy.body.x) enemy.body.rotation += Math.PI;
-        // }
         enemy.body.rotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
         console.log(game.math.angleBetween(player.body.x, player.body.y, enemy.body.x, enemy.body.y));
         enemyMoveCounter = game.time.now + 100; //Much more alert reaction
       }
       else { //Random aimless motion
         enemySpeed = 100;
-        enemy.body.angle += (Math.random() * 220) - 110;
-        enemyMoveCounter = game.time.now + 2000; //Sluggish to react
+        var randomAngularVelocity = (Math.random() * 50) - 25;
+        enemy.body.rotateLeft(randomAngularVelocity);
+        enemyMoveCounter = game.time.now + 2000; //More sluggish with no one around
       }
     }
-    // enemy.body.moveForward(enemySpeed); //Always moving
+    enemy.body.moveForward(enemySpeed); //Always moving
     enemy.animations.play('thrust');
 
   },
