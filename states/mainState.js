@@ -10,6 +10,7 @@ var degreesToRadians = Math.PI/180;
 var radiansToDegrees = 1/degreesToRadians;
 var enemyMoveCounter = 0;
 var enemySpeed = 100;
+var enemyAngry = false;
 
 var mainState = {
 
@@ -88,7 +89,7 @@ var mainState = {
     game.camera.follow(player);
 
     //Create enemy
-    enemy = game.add.sprite(game.world.centerX - 100, game.world.centerY + 200, 'player');
+    enemy = game.add.sprite(game.world.centerX + (Math.random() * 2000 - 1000), game.world.centerY + (Math.random() * 2000 - 1000), 'player');
     game.physics.p2.enable(enemy);
     enemy.body.setZeroDamping();
     enemy.anchor.setTo(0.5, 0.5);
@@ -245,24 +246,35 @@ var mainState = {
 
 
     //Update AI
-    if (game.time.now > enemyMoveCounter) { //Adjust velocity at regular intervals
-      //Enemy follows you if you get too close
-      tooClose = false; //always for now..
-      if (tooClose) {
-        enemySpeed = 200;
-        enemy.body.rotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
-        console.log(game.math.angleBetween(player.body.x, player.body.y, enemy.body.x, enemy.body.y));
-        enemyMoveCounter = game.time.now + 100; //Much more alert reaction
+    enemy.body.moveForward(enemySpeed); //Always moving
+    enemy.animations.play('thrust');
+
+    //If get too close, enemy becomes angry
+    if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) < 350) {
+      enemyAngry = true;
+    }
+    //Calms down if you get far enough away
+    if (enemyAngry) {
+      if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) > 500) {
+        enemyAngry = false;
       }
-      else { //Random aimless motion
+    }
+    //Angry behaviour
+    if (enemyAngry) {
+      enemySpeed = 200;
+      enemy.body.rotateLeft(0); //Stop spinning
+      enemy.body.rotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
+      // enemyMoveCounter = game.time.now + 100; //Much more alert reaction
+    }
+    //Calm behaviour
+    else {
+      if (game.time.now > enemyMoveCounter) { //Update behaviour at regular intervals
         enemySpeed = 100;
         var randomAngularVelocity = (Math.random() * 50) - 25;
         enemy.body.rotateLeft(randomAngularVelocity);
-        enemyMoveCounter = game.time.now + 2000; //More sluggish with no one around
+        enemyMoveCounter = game.time.now + 2000; //Sluggish with no one around
       }
     }
-    enemy.body.moveForward(enemySpeed); //Always moving
-    enemy.animations.play('thrust');
 
   },
 
@@ -364,7 +376,7 @@ function fireWeapon() {
   weapon.trackOffset.x = Math.sin(player.body.angle *  degreesToRadians) * player.width/2;
   weapon.trackOffset.y = Math.cos(player.body.angle *  degreesToRadians) * player.width/2 * (-1);
   weapon.fireAngle = player.body.angle - 90;
-  weapon.bulletSpeed = calculateSpeed(sprite) + 1000;
+  weapon.bulletSpeed = calculateSpeed(player) + 1000;
   weapon.fire();
 }
 
