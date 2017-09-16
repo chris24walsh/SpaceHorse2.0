@@ -13,6 +13,8 @@ var enemyMoveCounter = 0;
 var ENEMY_CALM_SPEED = 100;
 var ENEMY_ANGRY_SPEED = 200;
 var enemySpeed = ENEMY_CALM_SPEED;
+var ENEMY_REACT_DISTANCE = 350;
+var ENEMY_IGNORE_DISTANCE = 500;
 var ENEMY_REACTION_SPEED = 100;
 var enemyAngry = false;
 
@@ -57,7 +59,7 @@ var mainState = {
       }
       // planets[3].pivot.x = 200;
     }
-    for (var i=0; i<9; i++) planets[i].scale.setTo(planetScale, planetScale);
+    for (var i=0; i<9; i++) planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
 
     //Create player sprite
     if (gameData[0]) player = game.add.sprite(gameData[0], gameData[1], 'player');
@@ -255,12 +257,12 @@ var mainState = {
     enemy.animations.play('thrust');
 
     //If get too close, enemy becomes angry
-    if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) < 350) {
+    if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) < ENEMY_REACT_DISTANCE) {
       enemyAngry = true;
     }
     //Calms down if you get far enough away
     if (enemyAngry) {
-      if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) > 500) {
+      if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) > ENEMY_IGNORE_DISTANCE) {
         enemyAngry = false;
       }
     }
