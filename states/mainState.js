@@ -1,15 +1,19 @@
 var planets;
-var planetsDistanceScale = 800;
+var PLANETS_DISTANCE_SCALE = 800;
 var player;
 var radar;
 var planetDots;
-var radarScale = 0.002;
+var RADAR_SCALE = 0.002;
 var cursors;
-var maxSpeed = 1000;
-var degreesToRadians = Math.PI/180;
-var radiansToDegrees = 1/degreesToRadians;
+var PLAYER_MAX_SPEED = 1000;
+var DEGREES_TO_RADIANS = Math.PI/180;
+var RADIANS_T0_DEGREES = 1/DEGREES_TO_RADIANS;
+var enemy;
 var enemyMoveCounter = 0;
-var enemySpeed = 100;
+var ENEMY_CALM_SPEED = 100;
+var ENEMY_ANGRY_SPEED = 200;
+var enemySpeed = ENEMY_CALM_SPEED;
+var ENEMY_REACTION_SPEED = 100;
 var enemyAngry = false;
 
 var mainState = {
@@ -44,7 +48,7 @@ var mainState = {
     }
     else { //Create positions for planets
       for (var i=0; i<9; i++) {
-        planetsDistances[i] = planetsDistances[i] * planetsDistanceScale; //Scale up the planet distances
+        planetsDistances[i] = planetsDistances[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
         var randomAngle = Math.random() * 6.28319; //Randomise planets positions
         var randomX = planetsDistances[i] * Math.cos(randomAngle);
         var randomY = planetsDistances[i] * Math.tan(randomAngle);
@@ -154,7 +158,7 @@ var mainState = {
     //Accelerate
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && !cursors.right.isDown) {
       accelerate(player);
-      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrust');
+      if (calculateSpeed(player) < PLAYER_MAX_SPEED) player.animations.play('thrust');
       else player.animations.play('idle');
     }
 
@@ -162,7 +166,7 @@ var mainState = {
     if (cursors.up.isDown && !cursors.down.isDown && cursors.left.isDown && !cursors.right.isDown) {
       accelerate(player);
       player.body.rotateLeft(50);
-      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrustAndLeft');
+      if (calculateSpeed(player) < PLAYER_MAX_SPEED) player.animations.play('thrustAndLeft');
       else player.animations.play('movingLeft');
     }
 
@@ -170,7 +174,7 @@ var mainState = {
     if (cursors.up.isDown && !cursors.down.isDown && !cursors.left.isDown && cursors.right.isDown) {
       accelerate(player);
       player.body.rotateRight(50);
-      if (calculateSpeed(player) < maxSpeed) player.animations.play('thrustAndRight');
+      if (calculateSpeed(player) < PLAYER_MAX_SPEED) player.animations.play('thrustAndRight');
       else player.animations.play('movingRight');
     }
 
@@ -237,16 +241,16 @@ var mainState = {
     for (var i=0; i<9; i++) {
       planetDots[i].x = 0;
       planetDots[i].y = 0;
-      planetDots[i].x += (planets[i].x - player.body.x) * radarScale;
-      planetDots[i].y += (planets[i].y - player.body.y) * radarScale;
+      planetDots[i].x += (planets[i].x - player.body.x) * RADAR_SCALE;
+      planetDots[i].y += (planets[i].y - player.body.y) * RADAR_SCALE;
     }
     enemyDot.x = 0;
     enemyDot.y = 0;
-    enemyDot.x += (enemy.body.x - player.body.x) * radarScale;
-    enemyDot.y += (enemy.body.y - player.body.y) * radarScale;
+    enemyDot.x += (enemy.body.x - player.body.x) * RADAR_SCALE;
+    enemyDot.y += (enemy.body.y - player.body.y) * RADAR_SCALE;
 
 
-    //Update AI
+    //Update enemy AI
     enemy.body.moveForward(enemySpeed); //Always moving
     enemy.animations.play('thrust');
 
@@ -262,18 +266,38 @@ var mainState = {
     }
     //Angry behaviour
     if (enemyAngry) {
-      enemySpeed = 200;
-      enemy.body.rotateLeft(0); //Stop spinning
-      enemy.body.rotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
-      // enemyMoveCounter = game.time.now + 100; //Much more alert reaction
+      enemySpeed = ENEMY_ANGRY_SPEED;
+
+      //Find angle to attack player at
+      var attackRotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
+
+      //Resolve attackAngle to angle between 0 and PI*2
+      if (attackRotation < 0) attackRotation += (Math.PI * 2);
+      if (attackRotation > (Math.PI * 2)) attackRotation -= (Math.PI * 2);
+
+      //Resolve enemy's angle to angle between 0 and PI*2
+      if (enemy.body.rotation < 0) enemy.body.rotation += (Math.PI * 2);
+      if (enemy.body.rotation > (Math.PI * 2)) enemy.body.rotation -= (Math.PI * 2);
+
+      //Determine which way to rotate
+      if ((Math.abs(enemy.body.rotation - attackRotation)) < Math.PI/16) enemy.body.rotation = attackRotation; //Just follow angle angle
+      else if (enemy.body.rotation > attackRotation) {
+        if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateLeft(100);
+        else enemy.body.rotateRight(ENEMY_REACTION_SPEED);
+      }
+      else if (enemy.body.rotation < attackRotation) {
+        if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateRight(100);
+        else enemy.body.rotateLeft(ENEMY_REACTION_SPEED);
+      }
+
     }
     //Calm behaviour
     else {
       if (game.time.now > enemyMoveCounter) { //Update behaviour at regular intervals
-        enemySpeed = 100;
+        enemySpeed = ENEMY_CALM_SPEED;
         var randomAngularVelocity = (Math.random() * 50) - 25;
         enemy.body.rotateLeft(randomAngularVelocity);
-        enemyMoveCounter = game.time.now + 2000; //Sluggish with no one around
+        enemyMoveCounter = game.time.now + (Math.random() * 2000 + 1000); //Sluggish with no one around
       }
     }
 
@@ -282,7 +306,8 @@ var mainState = {
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
-    game.debug.spriteInfo(player, 32, 500);
+    // game.debug.spriteInfo(player, 32, 500);
+    game.debug.spriteInfo(enemy, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }
@@ -374,8 +399,8 @@ function toggleRadar() {
 
 //Fire weapon
 function fireWeapon() {
-  weapon.trackOffset.x = Math.sin(player.body.angle *  degreesToRadians) * player.width/2;
-  weapon.trackOffset.y = Math.cos(player.body.angle *  degreesToRadians) * player.width/2 * (-1);
+  weapon.trackOffset.x = Math.sin(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2;
+  weapon.trackOffset.y = Math.cos(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2 * (-1);
   weapon.fireAngle = player.body.angle - 90;
   weapon.bulletSpeed = calculateSpeed(player) + 1000;
   weapon.fire();
@@ -396,7 +421,7 @@ function calculateSpeed(sprite) {
 //Increase Velocity
 function accelerate(sprite) {
   var s = calculateSpeed(sprite);
-  if (s < maxSpeed) s += 10;
+  if (s < PLAYER_MAX_SPEED) s += 10;
   updateVelocity(sprite, s);
 }
 
@@ -410,6 +435,6 @@ function deccelerate(sprite) {
 
 //Change velocity
 function updateVelocity(sprite, speed) {
-  sprite.body.velocity.x = Math.sin(sprite.body.angle *  degreesToRadians) * speed;
-  sprite.body.velocity.y = Math.cos(sprite.body.angle *  degreesToRadians) * speed * (-1);
+  sprite.body.velocity.x = Math.sin(sprite.body.angle *  DEGREES_TO_RADIANS) * speed;
+  sprite.body.velocity.y = Math.cos(sprite.body.angle *  DEGREES_TO_RADIANS) * speed * (-1);
 }

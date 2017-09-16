@@ -7,7 +7,7 @@ var storyNumber;
 var canRunStory;
 var canAdvanceStory;
 
-var planetScale = 2;
+var PLANET_SCALE = 2;
 
 var introState = {
 
@@ -52,7 +52,7 @@ var introState = {
       // planets[3].pivot.x = 200;
     }
     for (var i=0; i<9; i++) planets[i].anchor.setTo(0.5, 0.5);
-    for (var i=0; i<9; i++) planets[i].scale.setTo(planetScale, planetScale);
+    for (var i=0; i<9; i++) planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
 
     //Focus camera on earth
     game.camera.x = planets[3].x - window.innerWidth/2;
