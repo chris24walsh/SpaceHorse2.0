@@ -43,27 +43,31 @@ var mainState = {
 
     //Create planets and put in position
     planets = new Array(9);
-    // for (var i=0; i<9; i++) planets[i] = "planet" + i;
-    var planetsDistances = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
+    planetCollisionGroup = game.physics.p2.createCollisionGroup();
     if (gameData[0]) { //Load positions from gameData
-      for (var i=0; i<9; i++) planets[i] = game.add.sprite(gameData[3+(i*2)], gameData[4+(i*2)], "planet" + i);
+      for (var i=0; i<9; i++) {
+        planets[i] = game.add.sprite(gameData[3+(i*2)], gameData[4+(i*2)], "planet" + i);
+      }
     }
     else { //Create positions for planets
       for (var i=0; i<9; i++) {
-        planetsDistances[i] = planetsDistances[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
+        PLANETS_RELATIVE_DISTANCES[i] = PLANETS_RELATIVE_DISTANCES[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
         var randomAngle = Math.random() * 6.28319; //Randomise planets positions
-        var randomX = planetsDistances[i] * Math.cos(randomAngle);
-        var randomY = planetsDistances[i] * Math.tan(randomAngle);
+        var randomX = PLANETS_RELATIVE_DISTANCES[i] * Math.cos(randomAngle);
+        var randomY = PLANETS_RELATIVE_DISTANCES[i] * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
-        planets[i].anchor.setTo(0.5, 0,5);
       }
-      // planets[3].pivot.x = 200;
     }
-    for (var i=0; i<9; i++) planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
+    for (var i=0; i<9; i++) {
+      planets[i].anchor.setTo(0.5, 0,5);
+      planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
+      game.physics.p2.enable(planets[i]);
+      planets[i].body.setCollisionGroup(planetCollisionGroup);
+    }
 
     //Create player sprite
-    if (gameData[0]) player = game.add.sprite(gameData[0], gameData[1], 'player');
-    else player = game.add.sprite(game.world.centerX, game.world.centerY, 'player');
+    if (gameData[0] && gameData[1]) player = game.add.sprite(gameData[0], gameData[1], 'player');
+    else player = game.add.sprite(planets[3].body.x, planets[3].body.y, 'player');
 
     game.physics.p2.enable(player);
 
@@ -89,6 +93,11 @@ var mainState = {
 
     //Create weapon
     weapon = game.add.weapon(30, 'fireBall');
+    playerWeaponCollisionGroup = game.physics.p2.createCollisionGroup();
+    // for (var i=0; i<30; i++) {
+      // console.log(weapon.bullets);//.body.setCollisionGroup(playerWeaponCollisionGroup);
+    // }
+    player.body.setCollisionGroup(playerWeaponCollisionGroup);
     weapon.bulletKillType = Phaser.Weapon.KILL_CAMERA_BOUNDS;
     weapon.trackSprite(player, 0, 0, false);
 
@@ -102,6 +111,8 @@ var mainState = {
     enemy.anchor.setTo(0.5, 0.5);
     enemy.animations.add('idle', [0], 10, true);
 		enemy.animations.add('thrust', [0], 10, true);
+    enemyCollisionGroup = game.physics.p2.createCollisionGroup();
+    enemy.body.setCollisionGroup(enemyCollisionGroup);
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
@@ -303,13 +314,16 @@ var mainState = {
       }
     }
 
+    //Check for collision between enemy and weapon
+    enemy.body.collides(playerWeaponCollisionGroup, killEnemy(enemy, enemyDot), this);
+
   },
 
   render: function() {
 
     // game.debug.cameraInfo(game.camera, 32, 32);
     // game.debug.spriteInfo(player, 32, 500);
-    game.debug.spriteInfo(enemy, 32, 500);
+    // game.debug.spriteInfo(enemy, 32, 500);
     // game.debug.spriteInfo(planets[3], 32, 500);
 
   }
@@ -439,4 +453,10 @@ function deccelerate(sprite) {
 function updateVelocity(sprite, speed) {
   sprite.body.velocity.x = Math.sin(sprite.body.angle *  DEGREES_TO_RADIANS) * speed;
   sprite.body.velocity.y = Math.cos(sprite.body.angle *  DEGREES_TO_RADIANS) * speed * (-1);
+}
+
+//Kill enemy
+function killEnemy(sprite1, sprite2) {
+  sprite1.kill();
+  sprite2.kill();
 }

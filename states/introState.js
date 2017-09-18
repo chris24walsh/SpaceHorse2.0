@@ -8,6 +8,8 @@ var canRunStory;
 var canAdvanceStory;
 
 var PLANET_SCALE = 2;
+var PLANETS_DISTANCE_SCALE = 800;
+var PLANETS_RELATIVE_DISTANCES = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
 
 var introState = {
 
@@ -31,28 +33,29 @@ var introState = {
     //Stop music
     // if (music) music.fadeOut(1000);
 
-    // game.physics.startSystem(Phaser.Physics.P2JS);
-
     //Create planets and put in position
     planets = new Array(9);
-    for (var i=0; i<9; i++) planets[i] = "planet" + i;
-    var planetsDistances = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
+    planetCollisionGroup = game.physics.p2.createCollisionGroup();
     if (gameData[0]) { //Load positions from gameData
-      for (var i=0; i<9; i++) planets[i] = game.add.sprite(gameData[3+(i*2)], gameData[4+(i*2)], "planet" + i);
+      for (var i=0; i<9; i++) {
+        planets[i] = game.add.sprite(gameData[3+(i*2)], gameData[4+(i*2)], "planet" + i);
+      }
     }
     else { //Create positions for planets
       for (var i=0; i<9; i++) {
-        planetsDistances[i] = planetsDistances[i] * planetsDistanceScale; //Scale up the planet distances
+        PLANETS_RELATIVE_DISTANCES[i] = PLANETS_RELATIVE_DISTANCES[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
         var randomAngle = Math.random() * 6.28319; //Randomise planets positions
-        var randomX = planetsDistances[i] * Math.cos(randomAngle);
-        var randomY = planetsDistances[i] * Math.tan(randomAngle);
+        var randomX = PLANETS_RELATIVE_DISTANCES[i] * Math.cos(randomAngle);
+        var randomY = PLANETS_RELATIVE_DISTANCES[i] * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
-        // planets[i].anchor.setTo(0.5, 0.5);
       }
-      // planets[3].pivot.x = 200;
     }
-    for (var i=0; i<9; i++) planets[i].anchor.setTo(0.5, 0.5);
-    for (var i=0; i<9; i++) planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
+    for (var i=0; i<9; i++) {
+      planets[i].anchor.setTo(0.5, 0,5);
+      planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
+      game.physics.p2.enable(planets[i]);
+      planets[i].body.setCollisionGroup(planetCollisionGroup);
+    }
 
     //Focus camera on earth
     game.camera.x = planets[3].x - window.innerWidth/2;
