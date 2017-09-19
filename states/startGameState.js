@@ -20,13 +20,13 @@ var startGameState = {
     text.alpha = 0;
 
     //Fade in text, move, and fade out text
-    tween1 = game.add.tween(text).to({alpha: 1}, 3000, Phaser.Easing.Linear.None);
+    tween1 = game.add.tween(text).to({alpha: 1}, 3000, Phaser.Easing.Linear.None, true);
     tween2 = game.add.tween(text).to({y: window.innerHeight*0.48}, 5000, Phaser.Easing.Linear.None, true);
-    tween1.to({alpha: 0}, 4000, Phaser.Easing.Linear.None, true);
+    // tween1.to({alpha: 0}, 4000, Phaser.Easing.Linear.None, true);
 
     //Timed exit of title screen
     timer = game.time.create(true);
-    timer.add(6000, function() {
+    timer.add(4000, function() {
       goToIntro();
     }, this);
     timer.start();
@@ -35,6 +35,7 @@ var startGameState = {
 
   update: function() {
 
+    //Skip title screen
     if (game.input.keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
       goToIntro();
     }
@@ -44,6 +45,7 @@ var startGameState = {
 };
 
 function goToIntro() {
+  var tween = game.add.tween(text).to({alpha: 0}, 3000, Phaser.Easing.Linear.None, true);
   music.fadeOut(3000);
   music.onFadeComplete.add(function() {
     game.state.start('intro');
