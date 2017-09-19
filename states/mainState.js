@@ -43,6 +43,7 @@ var mainState = {
 
     //Create planets and put in position
     planets = new Array(9);
+    planetGroup = game.add.group();
     planetCollisionGroup = game.physics.p2.createCollisionGroup();
     if (gameData[0]) { //Load positions from gameData
       for (var i=0; i<9; i++) {
@@ -51,17 +52,19 @@ var mainState = {
     }
     else { //Create positions for planets
       for (var i=0; i<9; i++) {
-        PLANETS_RELATIVE_DISTANCES[i] = PLANETS_RELATIVE_DISTANCES[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
-        var randomAngle = Math.random() * 6.28319; //Randomise planets positions
-        var randomX = PLANETS_RELATIVE_DISTANCES[i] * Math.cos(randomAngle);
-        var randomY = PLANETS_RELATIVE_DISTANCES[i] * Math.tan(randomAngle);
+        var planetRadialDistance = PLANETS_RELATIVE_DISTANCES[i] * PLANETS_DISTANCE_SCALE; //Scale up the planet distances
+        var randomAngle = Math.random() * Math.PI; //Get random angle (radians)
+        var randomX = planetRadialDistance * Math.cos(randomAngle);
+        var randomY = planetRadialDistance * Math.tan(randomAngle);
         planets[i] = game.add.sprite(game.world.centerX + randomX, game.world.centerY + randomY, "planet" + i);
       }
     }
+    //More setup for planet sprites
     for (var i=0; i<9; i++) {
       planets[i].anchor.setTo(0.5, 0,5);
       planets[i].scale.setTo(PLANET_SCALE, PLANET_SCALE);
       game.physics.p2.enable(planets[i]);
+      planetGroup.add(planets[i]);
       planets[i].body.setCollisionGroup(planetCollisionGroup);
     }
 
