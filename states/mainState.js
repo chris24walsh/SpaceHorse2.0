@@ -421,7 +421,9 @@ function toggleRadar() {
 
 //Fire weapon
 function fireWeapon() {
-  var bullet = bullets.create(player.body.x, player.body.y, 'fireBall');
+  bulletOffsetX = Math.sin(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2;
+  bulletOffsetY = Math.cos(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2 * (-1);
+  var bullet = bullets.create(player.body.x + bulletOffsetX, player.body.y + bulletOffsetY, 'fireBall');
   bullet.autoCull = true;
   bullet.outOfCameraBoundsKill = true;
   bullet.anchor.setTo(0.5, 0.5);
