@@ -25,7 +25,7 @@ var mainState = {
     game.load.image('background','assets/images/backgroundSprite.png');
     game.load.spritesheet('player','assets/images/shipSpriteSheet1.png', 100, 100);
     game.load.spritesheet('enemy', 'assets/images/enemyShip.png', 100, 100);
-    game.load.image('fireBall', 'assets/images/fireBall.png');
+    game.load.image('fireBall', 'assets/images/fireBall2.png');
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
 
@@ -39,12 +39,19 @@ var mainState = {
 
     game.physics.startSystem(Phaser.Physics.P2JS);
 
+    game.physics.p2.setImpactEvents(true);
+
+    //Create collision groups
+    playerCollisionGroup = game.physics.p2.createCollisionGroup();
+    playerWeaponCollisionGroup = game.physics.p2.createCollisionGroup();
+    planetCollisionGroup = game.physics.p2.createCollisionGroup();
+    enemyCollisionGroup = game.physics.p2.createCollisionGroup();
+
     // music.resume();
 
     //Create planets and put in position
     planets = new Array(9);
     planetGroup = game.add.group();
-    planetCollisionGroup = game.physics.p2.createCollisionGroup();
     if (gameData[0]) { //Load positions from gameData
       for (var i=0; i<9; i++) {
         planets[i] = game.add.sprite(gameData[3+(i*2)], gameData[4+(i*2)], "planet" + i);
@@ -74,12 +81,13 @@ var mainState = {
 
     game.physics.p2.enable(player);
 
-    player.body.setZeroDamping();
-
-    player.anchor.setTo(0.5, 0.5);
-
+    //Player physics properties
     if (gameData[2]) player.body.angle = gameData[2];
     else player.body.angle = 90;
+    player.body.setRectangle(40, 40);
+    player.body.setCollisionGroup(playerCollisionGroup);
+    player.body.setZeroDamping();
+    player.anchor.setTo(0.5, 0.5);
 
 		//  Our player animations, walking left, right, up and down.
     player.animations.add('idle', [0], 10, true);
@@ -95,34 +103,26 @@ var mainState = {
     player.animations.add('reverseAndRight', [15, 16], 10, true);
 
     //Create weapon
-    weapon = game.add.weapon(30, 'fireBall');
-    playerWeaponCollisionGroup = game.physics.p2.createCollisionGroup();
-    // for (var i=0; i<30; i++) {
-      // console.log(weapon.bullets);//.body.setCollisionGroup(playerWeaponCollisionGroup);
-    // }
-    player.body.setCollisionGroup(playerWeaponCollisionGroup);
-    weapon.bulletKillType = Phaser.Weapon.KILL_CAMERA_BOUNDS;
-    weapon.trackSprite(player, 0, 0, false);
-
-    //Create game camera, that follows player
-    game.camera.follow(player);
+    bullets = game.add.group();
+    bullets.enableBody = true;
+    bullets.physicsBodyType = Phaser.Physics.P2JS;
 
     //Create enemy
-    enemy = game.add.sprite(game.world.centerX + (Math.random() * 2000 - 1000), game.world.centerY + (Math.random() * 2000 - 1000), 'enemy');
+    enemy = game.add.sprite(player.body.x + (Math.random() * 2000 - 1000), player.body.y + (Math.random() * 2000 - 1000), 'enemy');
     game.physics.p2.enable(enemy);
+    enemy.body.setRectangle(40, 40);
+    enemy.body.setCollisionGroup(enemyCollisionGroup);
+    enemy.body.collides(playerWeaponCollisionGroup, killEnemy, this);
     enemy.body.setZeroDamping();
     enemy.anchor.setTo(0.5, 0.5);
     enemy.animations.add('idle', [0], 10, true);
 		enemy.animations.add('thrust', [0], 10, true);
-    enemyCollisionGroup = game.physics.p2.createCollisionGroup();
-    enemy.body.setCollisionGroup(enemyCollisionGroup);
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
     radar.scale.setTo(window.innerWidth/radar.width * 0.9, window.innerHeight/radar.height * 0.9);
     game.stage.addChild(radar);
-    radar.anchor.x = 0.5;
-    radar.anchor.y = 0.5;
+    radar.anchor.setTo(0.5, 0.5);
     radar.visible = false;
 
     //Create radar dots
@@ -131,15 +131,20 @@ var mainState = {
       planetDots[i] = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#6666ff'}));
       radar.addChild(planetDots[i]);
     }
+
     //Enemy dot
     enemyDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ff0000'}));
     radar.addChild(enemyDot);
+
     //Player dot
     playerDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#00ff00'}));
     radar.addChild(playerDot);
 
-    cursors = game.input.keyboard.createCursorKeys();
+    //Create game camera, that follows player
+    game.camera.follow(player);
 
+    //Create input name keys
+    cursors = game.input.keyboard.createCursorKeys();
 		keyboard = game.input.keyboard;
 
     //Make world visible
@@ -166,8 +171,6 @@ var mainState = {
     if (keyboard.addKey(Phaser.Keyboard.ESC).isDown) {
       statsMenu();
     }
-
-    // keyboard.addKey(Phaser.Keyboard.V).onDown.add(displayVelocity, this);
 
     //Update Movement
 
@@ -260,65 +263,65 @@ var mainState = {
       planetDots[i].x += (planets[i].x - player.body.x) * RADAR_SCALE;
       planetDots[i].y += (planets[i].y - player.body.y) * RADAR_SCALE;
     }
-    enemyDot.x = 0;
-    enemyDot.y = 0;
-    enemyDot.x += (enemy.body.x - player.body.x) * RADAR_SCALE;
-    enemyDot.y += (enemy.body.y - player.body.y) * RADAR_SCALE;
-
+    if (enemy.exists) {
+      enemyDot.x = 0;
+      enemyDot.y = 0;
+      enemyDot.x += (enemy.body.x - player.body.x) * RADAR_SCALE;
+      enemyDot.y += (enemy.body.y - player.body.y) * RADAR_SCALE;
+    }
 
     //Update enemy AI
-    enemy.body.moveForward(enemySpeed); //Always moving
-    enemy.animations.play('thrust');
+    if (enemy.exists) {
+      enemy.body.moveForward(enemySpeed); //Always moving
+      enemy.animations.play('thrust');
 
-    //If get too close, enemy becomes angry
-    if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) < ENEMY_REACT_DISTANCE) {
-      enemyAngry = true;
-    }
-    //Calms down if you get far enough away
-    if (enemyAngry) {
-      if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) > ENEMY_IGNORE_DISTANCE) {
-        enemyAngry = false;
+      //If get too close, enemy becomes angry
+      if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) < ENEMY_REACT_DISTANCE) {
+        enemyAngry = true;
+      }
+      //Calms down if you get far enough away
+      if (enemyAngry) {
+        if (game.math.distance(enemy.body.x, enemy.body.y, player.body.x, player.body.y) > ENEMY_IGNORE_DISTANCE) {
+          enemyAngry = false;
+        }
+      }
+      //Angry behaviour
+      if (enemyAngry) {
+        enemySpeed = ENEMY_ANGRY_SPEED;
+
+        //Find angle to attack player at
+        var attackRotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
+
+        //Resolve attackAngle to angle between 0 and PI*2
+        if (attackRotation < 0) attackRotation += (Math.PI * 2);
+        if (attackRotation > (Math.PI * 2)) attackRotation -= (Math.PI * 2);
+
+        //Resolve enemy's angle to angle between 0 and PI*2
+        if (enemy.body.rotation < 0) enemy.body.rotation += (Math.PI * 2);
+        if (enemy.body.rotation > (Math.PI * 2)) enemy.body.rotation -= (Math.PI * 2);
+
+        //Determine which way to rotate
+        if ((Math.abs(enemy.body.rotation - attackRotation)) < Math.PI/16) enemy.body.rotation = attackRotation; //Just follow angle angle
+        else if (enemy.body.rotation > attackRotation) {
+          if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateLeft(100);
+          else enemy.body.rotateRight(ENEMY_REACTION_SPEED);
+        }
+        else if (enemy.body.rotation < attackRotation) {
+          if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateRight(100);
+          else enemy.body.rotateLeft(ENEMY_REACTION_SPEED);
+        }
+
+      }
+      //Calm behaviour
+      else {
+        if (game.time.now > enemyMoveCounter) { //Update behaviour at regular intervals
+          enemySpeed = ENEMY_CALM_SPEED;
+          var randomAngularVelocity = (Math.random() * 50) - 25;
+          enemy.body.rotateLeft(randomAngularVelocity);
+          enemyMoveCounter = game.time.now + (Math.random() * 2000 + 1000); //Sluggish with no one around
+        }
       }
     }
-    //Angry behaviour
-    if (enemyAngry) {
-      enemySpeed = ENEMY_ANGRY_SPEED;
-
-      //Find angle to attack player at
-      var attackRotation = game.math.angleBetween(enemy.body.x, enemy.body.y, player.body.x, player.body.y) + Math.PI/2;
-
-      //Resolve attackAngle to angle between 0 and PI*2
-      if (attackRotation < 0) attackRotation += (Math.PI * 2);
-      if (attackRotation > (Math.PI * 2)) attackRotation -= (Math.PI * 2);
-
-      //Resolve enemy's angle to angle between 0 and PI*2
-      if (enemy.body.rotation < 0) enemy.body.rotation += (Math.PI * 2);
-      if (enemy.body.rotation > (Math.PI * 2)) enemy.body.rotation -= (Math.PI * 2);
-
-      //Determine which way to rotate
-      if ((Math.abs(enemy.body.rotation - attackRotation)) < Math.PI/16) enemy.body.rotation = attackRotation; //Just follow angle angle
-      else if (enemy.body.rotation > attackRotation) {
-        if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateLeft(100);
-        else enemy.body.rotateRight(ENEMY_REACTION_SPEED);
-      }
-      else if (enemy.body.rotation < attackRotation) {
-        if (Math.abs((enemy.body.rotation - attackRotation)) < Math.PI) enemy.body.rotateRight(100);
-        else enemy.body.rotateLeft(ENEMY_REACTION_SPEED);
-      }
-
-    }
-    //Calm behaviour
-    else {
-      if (game.time.now > enemyMoveCounter) { //Update behaviour at regular intervals
-        enemySpeed = ENEMY_CALM_SPEED;
-        var randomAngularVelocity = (Math.random() * 50) - 25;
-        enemy.body.rotateLeft(randomAngularVelocity);
-        enemyMoveCounter = game.time.now + (Math.random() * 2000 + 1000); //Sluggish with no one around
-      }
-    }
-
-    //Check for collision between enemy and weapon
-    enemy.body.collides(playerWeaponCollisionGroup, killEnemy(enemy, enemyDot), this);
 
   },
 
@@ -418,18 +421,16 @@ function toggleRadar() {
 
 //Fire weapon
 function fireWeapon() {
-  weapon.trackOffset.x = Math.sin(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2;
-  weapon.trackOffset.y = Math.cos(player.body.angle *  DEGREES_TO_RADIANS) * player.width/2 * (-1);
-  weapon.fireAngle = player.body.angle - 90;
-  weapon.bulletSpeed = calculateSpeed(player) + 1000;
-  weapon.fire();
+  var bullet = bullets.create(player.body.x, player.body.y, 'fireBall');
+  bullet.outOfCameraBoundsKill = true;
+  bullet.anchor.setTo(0.5, 0.5);
+  bullet.body.angle = player.body.angle;
+  bullet.body.setZeroDamping();
+  bullet.body.setRectangle(40, 40);
+  bullet.body.setCollisionGroup(playerWeaponCollisionGroup);
+  bullet.body.collides(enemyCollisionGroup);
+  updateVelocity(bullet, calculateSpeed(player) + 1000);
 }
-
-// //Display velocity
-// function displayVelocity() {
-//   var v = Math.sqrt( Math.pow(player.body.velocity.x, 2) + Math.pow(player.body.velocity.y, 2) );
-//   console.log(player.body.velocity.x, player.body.velocity.y, v);
-// }
 
 //Calculate velocity
 function calculateSpeed(sprite) {
@@ -460,6 +461,8 @@ function updateVelocity(sprite, speed) {
 
 //Kill enemy
 function killEnemy(sprite1, sprite2) {
-  sprite1.kill();
-  sprite2.kill();
+  //Destroy parent sprites of both colliding bodies
+  sprite1.sprite.destroy();
+  sprite2.sprite.destroy();
+  console.log("Hit");
 }
