@@ -1,6 +1,8 @@
 var planets;
 var PLANETS_DISTANCE_SCALE = 800;
 var player;
+var enemiesKilled = 0;
+var scrapCollected = 0;
 var radar;
 var planetDots;
 var RADAR_SCALE = 0.002;
@@ -26,6 +28,7 @@ var mainState = {
     game.load.spritesheet('player','assets/images/shipSpriteSheet1.png', 100, 100);
     game.load.spritesheet('enemy', 'assets/images/enemyShip.png', 100, 100);
     game.load.image('fireBall', 'assets/images/fireBall2.png');
+    game.load.image('spaceJunk', 'assets/images/spaceJunk.png');
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
 
@@ -46,6 +49,7 @@ var mainState = {
     playerWeaponCollisionGroup = game.physics.p2.createCollisionGroup();
     planetCollisionGroup = game.physics.p2.createCollisionGroup();
     enemyCollisionGroup = game.physics.p2.createCollisionGroup();
+    spaceJunkCollisionGroup = game.physics.p2.createCollisionGroup();
 
     // music.resume();
 
@@ -86,6 +90,7 @@ var mainState = {
     else player.body.angle = 90;
     player.body.setRectangle(40, 40);
     player.body.setCollisionGroup(playerCollisionGroup);
+    player.body.collides(spaceJunkCollisionGroup, collectSpaceJunk, this);
     player.body.setZeroDamping();
     player.anchor.setTo(0.5, 0.5);
 
@@ -107,6 +112,12 @@ var mainState = {
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.P2JS;
 
+    //Create some player stats on screen
+    playerEnemyStats = game.add.text(window.innerWidth * 0.05, window.innerHeight * 0.1, "Enemies killed: " + enemiesKilled, { font: "bold 20px Arial", fill: "#fff"});
+    game.stage.addChild(playerEnemyStats);
+    playerScrapStats = game.add.text(window.innerWidth * 0.05, window.innerHeight * 0.2, "Scrap collected: " + scrapCollected, { font: "bold 20px Arial", fill: "#fff"});
+    game.stage.addChild(playerScrapStats);
+
     //Create enemy
     enemy = game.add.sprite(player.body.x + (Math.random() * 2000 - 1000), player.body.y + (Math.random() * 2000 - 1000), 'enemy');
     game.physics.p2.enable(enemy);
@@ -117,6 +128,11 @@ var mainState = {
     enemy.anchor.setTo(0.5, 0.5);
     enemy.animations.add('idle', [0], 10, true);
 		enemy.animations.add('thrust', [0], 10, true);
+
+    //Create space junk group
+    spaceJunks = game.add.group();
+    spaceJunks.enableBody = true;
+    spaceJunks.physicsBodyType = Phaser.Physics.P2JS;
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
@@ -463,9 +479,32 @@ function updateVelocity(sprite, speed) {
 }
 
 //Kill enemy
-function killEnemy(sprite1, sprite2) {
+function killEnemy(enemyBody, bulletBody) {
+  //Drop some spacejunks just before destroying the enemy ship
+  for (var i=0; i<1; i++) {
+    var spaceJunk = spaceJunks.create(enemyBody.x, bulletBody.y, 'spaceJunk');
+    spaceJunk.body.setRectangle(40, 40);
+    spaceJunk.body.setCollisionGroup(spaceJunkCollisionGroup);
+    spaceJunk.body.collides(playerCollisionGroup);
+    spaceJunk.scale.setTo(0.5, 0.5);
+    spaceJunk.body.angle = Math.random() * 360;
+    updateVelocity(spaceJunk, 50);
+  }
   //Destroy parent sprites of both colliding bodies
-  sprite1.sprite.destroy();
-  sprite2.sprite.destroy();
+  enemyBody.sprite.destroy();
+  bulletBody.sprite.destroy();
   console.log("Hit");
+  //Increment playerScrapStats
+  enemiesKilled += 1;
+  playerEnemyStats.text = "Enemies killed: " + enemiesKilled;
+
+}
+
+//Collect space junk
+function collectSpaceJunk(playerBody, spaceJunkBody) {
+  //Destroy space junk sprite
+  spaceJunkBody.sprite.destroy();
+  //Increment playerScrapStats
+  scrapCollected += 1;
+  playerScrapStats.text = "Scrap collected: " + scrapCollected;
 }
