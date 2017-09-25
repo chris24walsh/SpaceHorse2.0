@@ -27,10 +27,11 @@ var mainState = {
     game.load.image('background','assets/images/backgroundSprite.png');
     game.load.spritesheet('player','assets/images/shipSpriteSheet1.png', 100, 100);
     game.load.spritesheet('enemy', 'assets/images/enemyShip.png', 100, 100);
-    game.load.image('fireBall', 'assets/images/fireBall2.png');
+    game.load.image('fireBall', 'assets/images/fireBall.png');
     game.load.image('spaceJunk', 'assets/images/spaceJunk.png');
     for (var i=0; i<9; i++) game.load.image("planet" + i, "assets/images/planet" + i + ".png");
     game.load.image('radar', 'assets/images/radar.png');
+    game.load.image('asteroid','assets/images/planet1.png');
 
   },
 
@@ -44,12 +45,15 @@ var mainState = {
 
     game.physics.p2.setImpactEvents(true);
 
+    game.physics.p2.restitution = 0;
+
     //Create collision groups
     playerCollisionGroup = game.physics.p2.createCollisionGroup();
     playerWeaponCollisionGroup = game.physics.p2.createCollisionGroup();
     planetCollisionGroup = game.physics.p2.createCollisionGroup();
     enemyCollisionGroup = game.physics.p2.createCollisionGroup();
     spaceJunkCollisionGroup = game.physics.p2.createCollisionGroup();
+    asteroidCollisionGroup = game.physics.p2.createCollisionGroup();
 
     // music.resume();
 
@@ -90,7 +94,17 @@ var mainState = {
     else player.body.angle = 90;
     player.body.setRectangle(40, 40);
     player.body.setCollisionGroup(playerCollisionGroup);
-    player.body.collides(spaceJunkCollisionGroup, collectSpaceJunk, this);
+    player.body.collides([asteroidCollisionGroup, spaceJunkCollisionGroup]);
+    player.body.onBeginContact.add(function(body) {
+      //If contact is made with spaceJunk
+      if (body.sprite.key == "spaceJunk") {
+        //Destroy space junk sprite
+        body.sprite.destroy();
+        //Increment playerScrapStats
+        scrapCollected += 1;
+        playerScrapStats.text = "Scrap collected: " + scrapCollected;
+      }
+    }, this);
     player.body.setZeroDamping();
     player.anchor.setTo(0.5, 0.5);
 
@@ -119,6 +133,7 @@ var mainState = {
     game.stage.addChild(playerScrapStats);
 
     //Create enemy
+
     enemy = game.add.sprite(player.body.x + (Math.random() * 2000 - 1000), player.body.y + (Math.random() * 2000 - 1000), 'enemy');
     game.physics.p2.enable(enemy);
     enemy.body.setRectangle(40, 40);
@@ -133,6 +148,21 @@ var mainState = {
     spaceJunks = game.add.group();
     spaceJunks.enableBody = true;
     spaceJunks.physicsBodyType = Phaser.Physics.P2JS;
+
+    // //Make some asteroids
+    // asteroids = game.add.group();
+    // asteroids.enableBody = true;
+    // asteroids.physicsBodyType = Phaser.Physics.P2JS;
+    for (var i=0; i<4; i++) {
+      var asteroid = new Asteroid('asteroid');
+      asteroid.make();
+      asteroid.sprite.scale.setTo(Math.random() * 3);
+      game.physics.p2.enable(asteroid.sprite);
+      asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
+      asteroid.sprite.body.collides(playerCollisionGroup);//, function(body1, body2) {
+        // body1.sprite.destroy();
+      // }, this);
+    }
 
     //Radar background
     radar = game.add.sprite(window.innerWidth*0.5, window.innerHeight*0.5, 'radar');
@@ -481,7 +511,7 @@ function updateVelocity(sprite, speed) {
 //Kill enemy
 function killEnemy(enemyBody, bulletBody) {
   //Drop some spacejunks just before destroying the enemy ship
-  for (var i=0; i<1; i++) {
+  for (var i=0; i<5; i++) {
     var spaceJunk = spaceJunks.create(enemyBody.x, bulletBody.y, 'spaceJunk');
     spaceJunk.body.setRectangle(40, 40);
     spaceJunk.body.setCollisionGroup(spaceJunkCollisionGroup);
@@ -493,7 +523,6 @@ function killEnemy(enemyBody, bulletBody) {
   //Destroy parent sprites of both colliding bodies
   enemyBody.sprite.destroy();
   bulletBody.sprite.destroy();
-  console.log("Hit");
   //Increment playerScrapStats
   enemiesKilled += 1;
   playerEnemyStats.text = "Enemies killed: " + enemiesKilled;
@@ -503,8 +532,16 @@ function killEnemy(enemyBody, bulletBody) {
 //Collect space junk
 function collectSpaceJunk(playerBody, spaceJunkBody) {
   //Destroy space junk sprite
-  spaceJunkBody.sprite.destroy();
+  spaceJunkBody.sprite.kill();
+  // spaceJunkBody.destroy();
   //Increment playerScrapStats
   scrapCollected += 1;
   playerScrapStats.text = "Scrap collected: " + scrapCollected;
+}
+
+//Class defintions
+function Asteroid(image) {
+  this.make = function() {
+    this.sprite = game.add.sprite(player.body.x + Math.random() * 200, player.body.y + Math.random() * 200, image);
+  }
 }
