@@ -598,38 +598,40 @@ function playerCollideAction(playerBody, body) {
   //Give player a shock
   //playerBody.sprite.health -= 1;
   //Destroy asteroid
-  if (body.sprite.key == 'asteroid') {
-    //If its big, break into two first
-    if (body.sprite.width > 55) {
-      for (var i=0; i<2; i++) {
-        //Create new smaller asteroid pieces
-        var asteroid = new Asteroid(body.x + (Math.random() * 20) - 10, body.y + (Math.random() * 20) - 10, 'asteroid');
-        asteroid.make();
-        asteroid.sprite.width = 30;
-        asteroid.sprite.height = 30;
-        asteroid.sprite.body.setCircle(asteroid.sprite.width/2);
-        asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
-        // asteroid.sprite.body.setCircle(asteroid.sprite.width/2);
-        asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
-        asteroid.sprite.body.collides([playerCollisionGroup, playerWeaponCollisionGroup], asteroidCollideAction, this);
-        asteroid.radarDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ffffff'}));
-        radar.addChild(this.radarDot);
-        //Give it some random velocity
-        asteroid.sprite.body.rotation = Math.random() * Math.PI * 2;
-        var speed = (Math.random() * 30) + 40;
-        updateVelocity(asteroid.sprite, speed);
+  if (body.sprite) {
+    if (body.sprite.key == 'asteroid') {
+      //If its big, break into two first
+      if (body.sprite.width > 55) {
+        for (var i=0; i<2; i++) {
+          //Create new smaller asteroid pieces
+          var asteroid = new Asteroid(body.x + (Math.random() * 20) - 10, body.y + (Math.random() * 20) - 10, 'asteroid');
+          asteroid.make();
+          asteroid.sprite.width = 30;
+          asteroid.sprite.height = 30;
+          asteroid.sprite.body.setCircle(asteroid.sprite.width/2);
+          asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
+          // asteroid.sprite.body.setCircle(asteroid.sprite.width/2);
+          asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
+          asteroid.sprite.body.collides([playerCollisionGroup, playerWeaponCollisionGroup], asteroidCollideAction, this);
+          asteroid.radarDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ffffff'}));
+          radar.addChild(this.radarDot);
+          //Give it some random velocity
+          asteroid.sprite.body.rotation = Math.random() * Math.PI * 2;
+          var speed = (Math.random() * 30) + 40;
+          updateVelocity(asteroid.sprite, speed);
+        }
       }
+      //Destroy the asteroid
+      body.sprite.destroy();
     }
-    //Destroy the asteroid
-    body.sprite.destroy();
-  }
-  //If contact is made with spaceJunk
-  else if (body.sprite.key == "spaceJunk") {
-    //Destroy space junk sprite
-    body.sprite.destroy();
-    //Increment playerScrapStats
-    scrapCollected += 1;
-    playerScrapStats.text = "Scrap collected: " + scrapCollected;
+    //If contact is made with spaceJunk
+    else if (body.sprite.key == "spaceJunk") {
+      //Destroy space junk sprite
+      body.sprite.destroy();
+      //Increment playerScrapStats
+      scrapCollected += 1;
+      playerScrapStats.text = "Scrap collected: " + scrapCollected;
+    }
   }
 }
 
