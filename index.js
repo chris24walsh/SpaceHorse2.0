@@ -11,5 +11,5 @@ game.state.add('statsMenu', statsMenuState);
 game.state.add('gameOver', gameOverState);
 
 //Start game in mainState
-// game.state.start('startGame');
-game.state.start('main');
+game.state.start('startGame');
+// game.state.start('main');
