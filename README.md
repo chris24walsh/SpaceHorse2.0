@@ -1,3 +1,6 @@
+## [Play SpaceHorse now!](http://spacehorse.walsh.tk/)
+Feel free to give me feedback, or fork and make pull requests for any features you think it should have.
+
 # Space Horse 2.0
 2D browser game built using open-source game framework, [Phaser](phaser.io).
 
