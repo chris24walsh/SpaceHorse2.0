@@ -614,7 +614,7 @@ function playerCollideAction(playerBody, body) {
           asteroid.sprite.body.setCollisionGroup(asteroidCollisionGroup);
           asteroid.sprite.body.collides([playerCollisionGroup, playerWeaponCollisionGroup], asteroidCollideAction, this);
           asteroid.radarDot = game.add.sprite(0, 0, box({length: 2, width: 2, color: '#ffffff'}));
-          radar.addChild(this.radarDot);
+          //radar.addChild(this.radarDot);
           //Give it some random velocity
           asteroid.sprite.body.rotation = Math.random() * Math.PI * 2;
           var speed = (Math.random() * 30) + 40;
