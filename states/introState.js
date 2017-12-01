@@ -11,6 +11,8 @@ var PLANET_SCALE = 2;
 var PLANETS_DISTANCE_SCALE = 800;
 var PLANETS_RELATIVE_DISTANCES = new Array(0, 2, 3, 5, 8, 27, 51, 103, 161);
 
+var fontStyle1 = { font: "bold 25px Microsoft Yi Baiti", fill: "#fff" };
+
 var introState = {
 
   preload: function() {
@@ -88,7 +90,7 @@ var introState = {
 		player.animations.add('thrust', [1, 2], 10, true);
 
     //Make text object
-    text = game.add.text(window.innerWidth*0.3, window.innerHeight*0.2, '', { font: "bold 25px Arial", fill: "#fff" });
+    text = game.add.text(window.innerWidth*0.3, window.innerHeight*0.2, '', fontStyle1);
     game.stage.addChild(text);
     text.alpha = 0;
     text.wordWrap = true;
@@ -127,19 +129,19 @@ var introState = {
           tween02.start();
         }, this);
         //Add texts to screen
-        text1 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.2, 'In a distant galaxy, peculiarly similar in many ways to our own.', { font: "bold 20px Arial", fill: "#fff" });
+        text1 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.2, 'In a distant galaxy, peculiarly similar in many ways to our own.', fontStyle1);
         game.stage.addChild(text1);
         text1.alpha = 0;
         text1.anchor.setTo(0.5, 0.5);
-        text2 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.3, 'One man is about to have his life changed forever.', { font: "bold 20px Arial", fill: "#fff" });
+        text2 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.3, 'One man is about to have his life changed forever.', fontStyle1);
         game.stage.addChild(text2);
         text2.alpha = 0;
         text2.anchor.setTo(0.5, 0.5);
-        text3 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.4, 'His destiny leads him to the stars.', { font: "bold 20px Arial", fill: "#fff" });
+        text3 = game.add.text(window.innerWidth*0.5, window.innerHeight*0.4, 'His destiny leads him to the stars.', fontStyle1);
         game.stage.addChild(text3);
         text3.alpha = 0;
         text3.anchor.setTo(0.5, 0.5);
-        text4 = game.add.text(window.innerWidth*0.33, window.innerHeight*0.5, 'But right now, he\'s a delivery boy....', { font: "bold 20px Arial", fill: "#fff" });
+        text4 = game.add.text(window.innerWidth*0.33, window.innerHeight*0.5, 'But right now, he\'s a delivery boy....', fontStyle1);
         game.stage.addChild(text4);
         text4.alpha = 0;
         text4.anchor.setTo(0, 0.5);
