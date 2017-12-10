@@ -1,4 +1,4 @@
-## [Play SpaceHorse now!](http://spacehorse.walsh.tk/)
+## [Play SpaceHorse now!](http://spacehorse.chriswalsh.tk/)
 Feel free to give me feedback, or fork and make pull requests for any features you think it should have.
 
 # Space Horse 2.0
